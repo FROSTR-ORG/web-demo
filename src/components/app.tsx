@@ -4,7 +4,7 @@ export default function App() {
     <div className="app">
       <div className="page-header">
         <img 
-          src="/assets/frostr-icon.png" 
+          src="assets/frostr-icon.png" 
           alt="Frost Logo" 
           className="frost-logo"
         />

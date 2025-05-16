@@ -17,6 +17,7 @@ interface BuildOptions {
   resolveExtensions?: string[]
   publicPath?: string
   assetNames?: string
+  plugins?: any[]
 }
 
 const PUBLIC_DIR = 'public'
@@ -114,7 +115,22 @@ async function build(): Promise<void> {
     },
     // Use relative paths for better compatibility
     publicPath: '',
-    assetNames: '[name]-[hash]'
+    assetNames: '[name]-[hash]',
+    // Add a plugin to handle image paths
+    plugins: [{
+      name: 'image-path',
+      setup(build) {
+        build.onResolve({ filter: /\.(png|jpg|svg|gif)$/ }, args => {
+          if (args.path.startsWith('/')) {
+            return {
+              path: path.resolve('public', args.path.slice(1)),
+              namespace: 'image-ns'
+            }
+          }
+          return null
+        })
+      }
+    }]
   }
 
   // Build app

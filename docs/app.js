@@ -24496,7 +24496,7 @@ function App() {
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
       "img",
       {
-        src: "/assets/frostr-icon.png",
+        src: "assets/frostr-icon.png",
         alt: "Frost Logo",
         className: "frost-logo"
       }
