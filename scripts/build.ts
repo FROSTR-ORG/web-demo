@@ -17,11 +17,20 @@ interface BuildOptions {
   resolveExtensions?: string[]
 }
 
+const PUBLIC_DIR = 'public'
+const DIST_DIR   = 'docs'
+
 async function build(): Promise<void> {
   const watch = process.argv.includes('--watch')
 
-  // Copy public files
-  fs.cpSync('./public', './dist', { recursive: true })
+  // Clean dist directory.
+  fs.rmSync(`./${DIST_DIR}`, { recursive: true, force: true })
+
+  // Copy public files.
+  fs.cpSync(`./${PUBLIC_DIR}`, `./${DIST_DIR}`, { recursive: true })
+
+  // Copy index.html.
+  fs.cpSync(`./index.html`, `./${DIST_DIR}/index.html`)
 
   // Build options
   const commonOptions: BuildOptions = {
@@ -39,7 +48,7 @@ async function build(): Promise<void> {
   const appBuildOptions: BuildOptions = {
     ...commonOptions,
     entryPoints : ['src/index.tsx'],
-    outfile     : 'dist/app.js',
+    outfile     : `${DIST_DIR}/app.js`,
     format      : 'esm',
     loader      : {
       '.tsx' : 'tsx',
