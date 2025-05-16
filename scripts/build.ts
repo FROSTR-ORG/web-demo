@@ -15,6 +15,8 @@ interface BuildOptions {
   loader?      : { [ext: string]: Loader }
   alias?       : { [pkg: string]: string }
   resolveExtensions?: string[]
+  publicPath?: string
+  assetNames?: string
 }
 
 const PUBLIC_DIR = 'public'
@@ -48,6 +50,9 @@ async function build(): Promise<void> {
         } else if (args.path.startsWith('./styles/')) {
           // Handle relative styles imports
           fullPath = path.resolve('src', args.path.slice(2))
+        } else if (args.path.startsWith('/styles/')) {
+          // Handle absolute styles imports
+          fullPath = path.resolve('src', args.path.slice(1))
         } else {
           // Handle other relative imports
           fullPath = path.resolve(args.resolveDir, args.path)
@@ -70,8 +75,9 @@ async function build(): Promise<void> {
           await fs.promises.writeFile(outPath, css)
           
           // Return a module that imports the CSS file from the styles directory
+          // Use absolute path for GitHub Pages compatibility
           return {
-            contents: `import './styles/${filename}'`,
+            contents: `import '/styles/${filename}'`,
             loader: 'js'
           }
         } catch (error) {
@@ -92,16 +98,8 @@ async function build(): Promise<void> {
       '@': path.resolve('src'),
       'styles': path.resolve('src/styles')
     },
-    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.css', '.json']
-  }
-
-  // Build app
-  const appBuildOptions: BuildOptions = {
-    ...commonOptions,
-    entryPoints : ['src/index.tsx'],
-    outfile     : `${DIST_DIR}/app.js`,
-    format      : 'esm',
-    loader      : {
+    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.css', '.json'],
+    loader: {
       '.tsx' : 'tsx',
       '.ts'  : 'ts',
       '.css' : 'css',
@@ -110,6 +108,17 @@ async function build(): Promise<void> {
       '.svg' : 'file',
       '.gif' : 'file',
     },
+    // Add public path for GitHub Pages
+    publicPath: '/',
+    assetNames: '[name]-[hash]'
+  }
+
+  // Build app
+  const appBuildOptions: BuildOptions = {
+    ...commonOptions,
+    entryPoints : ['src/index.tsx'],
+    outfile     : `${DIST_DIR}/app.js`,
+    format      : 'esm',
   }
 
   if (watch) {
