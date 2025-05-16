@@ -74,10 +74,9 @@ async function build(): Promise<void> {
           const outPath = path.join(stylesDir, filename)
           await fs.promises.writeFile(outPath, css)
           
-          // Return a module that imports the CSS file from the styles directory
-          // Use absolute path for GitHub Pages compatibility
+          // Return a module that imports the CSS file using relative path
           return {
-            contents: `import '/styles/${filename}'`,
+            contents: `import './styles/${filename}'`,
             loader: 'js'
           }
         } catch (error) {
@@ -108,8 +107,8 @@ async function build(): Promise<void> {
       '.svg' : 'file',
       '.gif' : 'file',
     },
-    // Add public path for GitHub Pages
-    publicPath: '/',
+    // Use relative paths for better compatibility
+    publicPath: './',
     assetNames: '[name]-[hash]'
   }
 
