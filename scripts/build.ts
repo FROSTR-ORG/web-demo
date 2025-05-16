@@ -32,14 +32,65 @@ async function build(): Promise<void> {
   // Copy index.html.
   fs.cpSync(`./index.html`, `./${DIST_DIR}/index.html`)
 
+  // Modified CSS plugin to extract CSS into separate files
+  const cssPlugin = {
+    name: 'css',
+    setup(build) {
+      build.onResolve({ filter: /\.css$/ }, args => {
+        // Handle both direct imports and aliased imports
+        let fullPath: string
+        if (args.path.startsWith('@/')) {
+          // Handle @ alias
+          fullPath = path.resolve('src', args.path.slice(2))
+        } else if (args.path.startsWith('styles/')) {
+          // Handle styles alias
+          fullPath = path.resolve('src', args.path)
+        } else if (args.path.startsWith('./styles/')) {
+          // Handle relative styles imports
+          fullPath = path.resolve('src', args.path.slice(2))
+        } else {
+          // Handle other relative imports
+          fullPath = path.resolve(args.resolveDir, args.path)
+        }
+        return { path: fullPath, namespace: 'css-ns' }
+      })
+
+      build.onLoad({ filter: /.*/, namespace: 'css-ns' }, async (args) => {
+        try {
+          // Read the CSS file from its source location
+          const css = await fs.promises.readFile(args.path, 'utf8')
+          const filename = path.basename(args.path)
+          const stylesDir = path.join(DIST_DIR, 'styles')
+          
+          // Ensure styles directory exists
+          await fs.promises.mkdir(stylesDir, { recursive: true })
+          
+          // Write CSS to styles directory
+          const outPath = path.join(stylesDir, filename)
+          await fs.promises.writeFile(outPath, css)
+          
+          // Return a module that imports the CSS file from the styles directory
+          return {
+            contents: `import './styles/${filename}'`,
+            loader: 'js'
+          }
+        } catch (error) {
+          console.error(`Error processing CSS file ${args.path}:`, error)
+          throw error
+        }
+      })
+    }
+  }
+
   // Build options
   const commonOptions: BuildOptions = {
     bundle    : true,
     minify    : !watch,
-    sourcemap : watch,
+    sourcemap : true,
     target    : ['chrome58', 'firefox57', 'safari11', 'edge18'],
     alias     : {
-      '@': path.resolve('src')
+      '@': path.resolve('src'),
+      'styles': path.resolve('src/styles')
     },
     resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.css', '.json']
   }
@@ -59,31 +110,6 @@ async function build(): Promise<void> {
       '.svg' : 'file',
       '.gif' : 'file',
     },
-  }
-
-  // Additional plugins for CSS processing
-  const cssPlugin = {
-    name: 'css',
-    setup(build) {
-      build.onResolve({ filter: /\.css$/ }, args => {
-        // Handle CSS imports
-        const filePath = path.resolve(args.resolveDir, args.path)
-        return { path: filePath, namespace: 'css-ns' }
-      })
-
-      build.onLoad({ filter: /.*/, namespace: 'css-ns' }, async (args) => {
-        // Load and inject CSS
-        const css = await fs.promises.readFile(args.path, 'utf8')
-        const escaped = css.replace(/`/g, '\\`').replace(/\$/g, '\\$')
-        const contents = `
-          const style = document.createElement('style')
-          style.type = 'text/css'
-          style.appendChild(document.createTextNode(\`${escaped}\`))
-          document.head.appendChild(style)
-        `
-        return { contents, loader: 'js' }
-      })
-    }
   }
 
   if (watch) {

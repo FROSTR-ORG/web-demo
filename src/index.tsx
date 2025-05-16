@@ -3,9 +3,9 @@ import { createRoot } from 'react-dom/client'
 
 import App from './components/app.js'
 
-import './styles/global.css'
-import './styles/connected.css'
-import './styles/options.css'
+import '@/styles/global.css'
+import '@/styles/connected.css'
+import '@/styles/options.css'
 
 // Fetch the root container.
 const container = document.getElementById('root')
