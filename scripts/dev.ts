@@ -5,7 +5,7 @@ const SERVE_PORT = 3000
 
 concurrently([
   `tsx scripts/build.ts --watch`,
-  `serve dist -p ${SERVE_PORT}`
+  `serve docs -p ${SERVE_PORT}`
 ])
 
 console.log(`webserver running at ${SERVE_HOST}:${SERVE_PORT}`)

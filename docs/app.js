@@ -24516,6 +24516,24 @@ function App() {
   ] }) });
 }
 
+// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/global.css
+var link = document.createElement("link");
+link.rel = "stylesheet";
+link.href = "./styles/global.css";
+document.head.appendChild(link);
+
+// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/connected.css
+var link2 = document.createElement("link");
+link2.rel = "stylesheet";
+link2.href = "./styles/connected.css";
+document.head.appendChild(link2);
+
+// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/options.css
+var link3 = document.createElement("link");
+link3.rel = "stylesheet";
+link3.href = "./styles/options.css";
+document.head.appendChild(link3);
+
 // src/index.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime());
 var container = document.getElementById("root");

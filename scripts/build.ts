@@ -31,7 +31,7 @@ async function build(): Promise<void> {
   // Copy public files.
   fs.cpSync(`./${PUBLIC_DIR}`, `./${DIST_DIR}`, { recursive: true })
 
-  // Copy index.html.
+  // Copy index.html
   fs.cpSync(`./index.html`, `./${DIST_DIR}/index.html`)
 
   // Modified CSS plugin to extract CSS into separate files
@@ -74,9 +74,14 @@ async function build(): Promise<void> {
           const outPath = path.join(stylesDir, filename)
           await fs.promises.writeFile(outPath, css)
           
-          // Return a module that imports the CSS file using relative path
+          // Return a module that creates a link element to load the CSS
           return {
-            contents: `import './styles/${filename}'`,
+            contents: `
+              const link = document.createElement('link');
+              link.rel = 'stylesheet';
+              link.href = './styles/${filename}';
+              document.head.appendChild(link);
+            `,
             loader: 'js'
           }
         } catch (error) {
@@ -120,6 +125,25 @@ async function build(): Promise<void> {
     format      : 'esm',
   }
 
+  // Copy CSS files to dist
+  const copyCssFiles = async () => {
+    const srcStylesDir = path.join('src', 'styles')
+    const distStylesDir = path.join(DIST_DIR, 'styles')
+    
+    // Ensure dist styles directory exists
+    await fs.promises.mkdir(distStylesDir, { recursive: true })
+    
+    // Copy all CSS files
+    const files = await fs.promises.readdir(srcStylesDir)
+    for (const file of files) {
+      if (file.endsWith('.css')) {
+        const srcPath = path.join(srcStylesDir, file)
+        const distPath = path.join(distStylesDir, file)
+        await fs.promises.copyFile(srcPath, distPath)
+      }
+    }
+  }
+
   if (watch) {
     // Use context API for watch mode
     const appContext = await esbuild.context({
@@ -128,7 +152,8 @@ async function build(): Promise<void> {
     })
     
     await Promise.all([
-      appContext.watch()
+      appContext.watch(),
+      copyCssFiles()
     ])
     
     console.log('[ build ] watching for changes...')
@@ -138,7 +163,8 @@ async function build(): Promise<void> {
       esbuild.build({
         ...appBuildOptions,
         plugins: [cssPlugin]
-      })
+      }),
+      copyCssFiles()
     ])
     
     console.log('[ build ] build complete')
