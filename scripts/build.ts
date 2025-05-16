@@ -79,7 +79,7 @@ async function build(): Promise<void> {
             contents: `
               const link = document.createElement('link');
               link.rel = 'stylesheet';
-              link.href = './styles/${filename}';
+              link.href = 'styles/${filename}';
               document.head.appendChild(link);
             `,
             loader: 'js'
@@ -113,7 +113,7 @@ async function build(): Promise<void> {
       '.gif' : 'file',
     },
     // Use relative paths for better compatibility
-    publicPath: './',
+    publicPath: '',
     assetNames: '[name]-[hash]'
   }
 
