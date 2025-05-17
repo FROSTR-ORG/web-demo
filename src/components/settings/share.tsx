@@ -21,18 +21,32 @@ export default function ({ store } : StoreParams) {
     // If the input is empty,
     if (input === '') {
       // Set the group to null.
-      // TODO: PWA storage update
-      // NodeStore.update({ share : null })
+      store.update({ share : null })
     } else {
       // Parse the input and update the group.
       const share = get_share_pkg(input)
       if (share === null) return
-      // TODO: PWA storage update
-      // NodeStore.update({ share })
+      store.update({ share })
     }
     setSaved(true)
     setTimeout(() => setSaved(false), 1500)
   }
+
+  useEffect(() => {
+    // Subscribe to store changes
+    const unsubscribe = store.subscribe(() => {
+      const share = store.get().share
+      if (share === null) {
+        setInput('')
+      } else { 
+        setInput(encode_share_pkg(share))
+      }
+      setError(null)
+    })
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe()
+  }, [ store ])
 
   // Validate the share input when it changes.
   useEffect(() => {
@@ -51,21 +65,6 @@ export default function ({ store } : StoreParams) {
       }
     }
   }, [ input ])
-
-  useEffect(() => {
-    try {
-      if (store.share === null) {
-        setInput('')
-        setError(null)
-      } else {
-        const str = encode_share_pkg(store.share)
-        setInput(str)
-        setError(null)
-      }
-    } catch (err) {
-      setError('failed to decode package data')
-    }
-  }, [ store.share ])
 
   return (
     <div className="container">
@@ -89,7 +88,7 @@ export default function ({ store } : StoreParams) {
             <button
               className={`button action-button ${saved ? 'saved-button' : ''}`}
               onClick={update}
-              disabled={!is_share_changed(input, store.share) || error !== null}
+              disabled={!is_share_changed(input, store.get().share) || error !== null}
             >
               {saved ? 'Saved' : 'Save'}
             </button>

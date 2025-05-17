@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
-import type { PeerPolicy }  from '@frostr/bifrost'
 import type { StoreParams } from '@/types/index.js'
+import type { PeerPolicy }  from '@frostr/bifrost'
 
 export default function ({ store } : StoreParams) {
-  const [ peers, setPeers ]     = useState<PeerPolicy[] | null>(store.peers)
+  const [ peers, setPeers ]     = useState<PeerPolicy[]>(store.get().peers)
   const [ changes, setChanges ] = useState<boolean>(false)
   const [ saved, setSaved ]     = useState<boolean>(false)
 
@@ -19,7 +19,7 @@ export default function ({ store } : StoreParams) {
 
   // Discard changes by resetting local state from store
   const cancel = () => {
-    setPeers(store.peers)
+    setPeers(store.get().peers)
     setChanges(false)
   }
 
@@ -34,8 +34,12 @@ export default function ({ store } : StoreParams) {
   }
 
   useEffect(() => {
-    setPeers(store.peers)
-  }, [ store.peers ])
+    // Subscribe to store changes
+    const unsubscribe = store.subscribe(() => {
+      setPeers(store.get().peers)
+    })
+    return () => unsubscribe()
+  }, [ store ])
 
   return (
     <div className="container">

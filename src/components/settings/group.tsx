@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react'
-// TODO: PWA storage update
-// import { NodeStore }           from '@/stores/node.js'
 
 import {
   decode_group_pkg,
@@ -25,22 +23,35 @@ export default function ({ store } : StoreParams) {
     if (error !== null) return
     // If the input is empty,
     if (input === '') {
-      // TODO: PWA storage update
-      // Set the group to null.
-      // NodeStore.update({ group : null })
+      store.update({ group : null })
     } else {
       // Parse the input into a group package.
       const group = get_group_pkg(input)
       // If the group package is invalid, return.
       if (group === null) return
       // Update the group in the store.
-      // TODO: PWA storage update
-      // NodeStore.update({ group })
+      store.update({ group })
     }
     // Set the saved state, and reset it after a short delay.
     setSaved(true)
     setTimeout(() => setSaved(false), 1500)
   }
+
+  useEffect(() => {
+    // Subscribe to store changes
+    const unsubscribe = store.subscribe(() => {
+      const group = store.get().group
+      if (group === null) {
+        setInput('')
+      } else { 
+        setInput(encode_group_pkg(group))
+      }
+      setError(null)
+    })
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe()
+  }, [ store ])
 
   /**
    * Handle the validation of the input when it changes.
@@ -68,24 +79,6 @@ export default function ({ store } : StoreParams) {
     }
   }, [ input ])
 
-  /**
-   * Handle the update of the input when the store changes.
-   */
-  useEffect(() => {
-    try {
-      if (store.group === null) {
-        setInput('')
-        setError(null)
-      } else {
-        const str = encode_group_pkg(store.group)
-        setInput(str)
-        setError(null)
-      }
-    } catch (err) {
-      setError('failed to decode package data')
-    }
-  }, [ store.group ])
-
   return (
     <div className="container">
       <h2 className="section-header">Group Package</h2>
@@ -108,7 +101,7 @@ export default function ({ store } : StoreParams) {
             <button
               className={`button action-button ${saved ? 'saved-button' : ''}`} 
               onClick={update}
-              disabled={!is_group_changed(input, store.group) || error !== null}
+              disabled={!is_group_changed(input, store.get().group) || error !== null}
             >
               {saved ? 'Saved' : 'Save'}
             </button>

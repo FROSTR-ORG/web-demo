@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 
-import type { StoreParams } from '@/types/index.js'
-import type { RelayPolicy } from '@/types/node.ts'
+import type {
+  StoreParams,
+  RelayPolicy
+} from '@/types/index.js'
 
 export default function ({ store } : StoreParams) {
-  const [ relays, setRelays ]   = useState<RelayPolicy[]>(store.relays)
+  const [ relays, setRelays ]   = useState<RelayPolicy[]>(store.get().relays)
   const [ relayUrl, setUrl ]    = useState('')
   const [ changes, setChanges ] = useState<boolean>(false)
   const [ error, setError ]     = useState<string | null>(null)
@@ -13,7 +15,7 @@ export default function ({ store } : StoreParams) {
   // Update the peer policies in the store.
   const update = () => {
     // TODO: PWA storage update
-    // NodeStore.update({ relays })
+    store.update({ relays })
     setChanges(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 1500)
@@ -21,7 +23,7 @@ export default function ({ store } : StoreParams) {
 
   // Discard changes by resetting local state from store
   const cancel = () => {
-    setRelays(store.relays)
+    setRelays(store.get().relays)
     setChanges(false)
   }
   
@@ -59,8 +61,14 @@ export default function ({ store } : StoreParams) {
   }
 
   useEffect(() => {
-    setRelays(store.relays)
-  }, [ store.relays ])
+    // Subscribe to store changes
+    const unsubscribe = store.subscribe(() => {
+      setRelays(store.get().relays)
+    })
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe()
+  }, [ store ])
 
   useEffect(() => {
     if (error !== null) setError(null)

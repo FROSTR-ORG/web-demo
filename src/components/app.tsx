@@ -1,10 +1,16 @@
 import { Store } from '@/class/store.js'
 
-import Header     from './header.js'
-import NodeConfig from './node/index.js'
+import Header      from './header.js'
+import Settings    from './settings/index.js'
+import NodeService from './node/service.js'
 
-const DEFAULT_STORE = {
-  name: 'Frost'
+import type{ AppStore } from '@/types/index.js'
+
+const DEFAULT_STORE : AppStore = {
+  group  : null,
+  share  : null,
+  relays : [],
+  peers  : [],
 }
 
 export default function App() {
@@ -14,7 +20,8 @@ export default function App() {
   return (
     <div className="app">
       <Header />
-      <NodeConfig store={store} />
+      <Settings store={store} />
+      <NodeService store={store} />
     </div>
   )
 }

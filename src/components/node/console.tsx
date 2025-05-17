@@ -1,29 +1,19 @@
-// import { LogStore }     from '../stores/logs.js'
-
 import {
   useEffect,
   useState,
   useRef
 } from 'react'
 
-import type { LogEntry } from '../types/console.js'
+import type { LogEntry } from '@/types/index.js'
 
 import '../styles/console.css'
 
-export default function Console() {
+export default function Console () {
   // State for logs
   const [ logs, setLogs ] = useState<LogEntry[]>([])
   
   // Create a ref for the console output element
   const consoleOutputRef = useRef<HTMLDivElement>(null)
-
-  // Load logs on mount and set up subscription.
-  useEffect(() => {
-    // TODO: Update for PWA
-    // LogStore.fetch().then(logs => setLogs(logs))
-    // const unsub = LogStore.subscribe(logs => setLogs(logs))
-    // return () => unsub()
-  }, [])
 
   // Auto-scroll to bottom when logs change
   useEffect(() => {
@@ -35,16 +25,13 @@ export default function Console() {
 
   // Clear logs handler
   const clear_handler = async () => {
-    // TODO: Update for PWA
-    // LogStore.clear().then(() => setLogs([]))
+    setLogs([])
   }
 
   // Reset node handler
   const reset_handler = async () => {
     try {
-        // TODO: Update for PWA
-      // Still send message to reset the node
-    //   await browser.runtime.sendMessage({ type: MESSAGE_TYPE.NODE_RESET })
+      //
     } catch (error) {
       console.error('error resetting node:', error)
     }

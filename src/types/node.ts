@@ -1,5 +1,5 @@
-export interface RelayPolicy {
-    url   : string
-    read  : boolean
-    write : boolean
-  }
+export interface LogEntry {
+  timestamp : string
+  message   : string
+  type      : 'info' | 'error' | 'warning' | 'success'
+}
