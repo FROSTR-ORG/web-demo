@@ -9,7 +9,9 @@ import {
 
 import type { GroupPackage } from '@frostr/bifrost'
 
-export default function ({ store } : { store : any }) {
+import type { StoreParams } from '@/types/index.js'
+
+export default function ({ store } : StoreParams) {
   const [ input, setInput ] = useState<string>('')
   const [ error, setError ] = useState<string | null>(null)
   const [ show, setShow   ] = useState<boolean>(false)

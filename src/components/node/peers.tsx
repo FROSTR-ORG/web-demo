@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
-// TODO: PWA storage update
-// import { NodeStore }           from '@/stores/node.js'
 
-import type { PeerPolicy } from '@frostr/bifrost'
+import type { PeerPolicy }  from '@frostr/bifrost'
+import type { StoreParams } from '@/types/index.js'
 
-export default function ({ store } : { store : any }) {
+export default function ({ store } : StoreParams) {
   const [ peers, setPeers ]     = useState<PeerPolicy[] | null>(store.peers)
   const [ changes, setChanges ] = useState<boolean>(false)
   const [ saved, setSaved ]     = useState<boolean>(false)

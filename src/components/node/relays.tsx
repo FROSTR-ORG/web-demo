@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
-// TODO: PWA storage update
-// import { NodeStore }           from '@/stores/node.js'
 
+import type { StoreParams } from '@/types/index.js'
 import type { RelayPolicy } from '@/types/node.ts'
 
-export default function ({ store } : { store : any }) {
+export default function ({ store } : StoreParams) {
   const [ relays, setRelays ]   = useState<RelayPolicy[]>(store.relays)
   const [ relayUrl, setUrl ]    = useState('')
   const [ changes, setChanges ] = useState<boolean>(false)

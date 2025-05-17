@@ -1,26 +1,20 @@
+import { Store } from '@/class/store.js'
+
+import Header     from './header.js'
+import NodeConfig from './node/index.js'
+
+const DEFAULT_STORE = {
+  name: 'Frost'
+}
+
 export default function App() {
+
+  const store = new Store('frostr-web', DEFAULT_STORE)
 
   return (
     <div className="app">
-      <div className="page-header">
-        <img 
-          src="assets/frostr-icon.png" 
-          alt="Frost Logo" 
-          className="frost-logo"
-        />
-        <div className="title-container">
-          <h1>FROSTR Web Demo</h1>
-        </div>
-        <p>FROSTR Web Demo</p>
-        <a 
-          href="https://frostr.org" 
-          target="_blank" 
-          rel="noopener noreferrer"
-        >
-          https://frostr.org
-        </a>
-        <div className="alpha-pill alpha-pill-standalone">alpha edition</div>
-      </div>
+      <Header />
+      <NodeConfig store={store} />
     </div>
   )
 }

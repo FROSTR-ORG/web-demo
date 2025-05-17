@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react'
-// TODO: PWA storage update
-// import { NodeStore }           from '@/stores/node.js'
 
 import {
   decode_share_pkg,
@@ -8,8 +6,9 @@ import {
 } from '@frostr/bifrost/lib'
 
 import type { SharePackage } from '@frostr/bifrost'
+import type { StoreParams }  from '@/types/index.js'
 
-export default function ({ store } : { store : any }) {
+export default function ({ store } : StoreParams) {
   const [ input, setInput ] = useState<string>('')
   const [ error, setError ] = useState<string | null>(null)
   const [ show, setShow   ] = useState<boolean>(false)
