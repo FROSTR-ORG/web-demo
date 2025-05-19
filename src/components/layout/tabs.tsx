@@ -6,7 +6,7 @@ import { Settings }  from '@/components/settings/index.js'
 
 import type { ReactElement } from 'react'
 
-import * as Icons from '@/components/icons.js'
+import * as Icons from '@/components/util/icons.js'
 
 export function Tabs(): ReactElement {
   const [ activeTab, setActiveTab ] = useState('dashboard')

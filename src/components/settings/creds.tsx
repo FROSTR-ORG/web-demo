@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { get_pubkey }          from '@frostr/bifrost/util'
 import { useStore }            from '@/store/index.js'
+import { QRScanner }           from '@/components/util/scanner.js'
 
 import {
   decode_credentials,
@@ -17,6 +18,7 @@ export function CredentialsConfig() {
   const [ error, setError ] = useState<string | null>(null)
   const [ show, setShow   ] = useState<boolean>(false)
   const [ saved, setSaved ] = useState<boolean>(false)
+  const [ isScanning, setIsScanning ] = useState<boolean>(false)
 
   /**
    * Handle the update of the store.
@@ -105,6 +107,12 @@ export function CredentialsConfig() {
               {show ? 'hide' : 'show'}
             </button>
             <button
+              className="button"
+              onClick={() => setIsScanning(!isScanning)}
+            >
+              {isScanning ? 'stop scan' : 'scan'}
+            </button>
+            <button
               className={`button action-button ${saved ? 'saved-button' : ''}`} 
               onClick={update_creds}
               disabled={!is_creds_changed(input, store.data.creds) || error !== null}
@@ -113,6 +121,18 @@ export function CredentialsConfig() {
             </button>
           </div>
         </div>
+        
+        {isScanning && (
+          <QRScanner
+            onResult={(result: string) => {
+              setInput(result.trim())
+              setIsScanning(false)
+            }}
+            onError={(error: Error) => {
+              console.error('QR scan error:', error)
+            }}
+          />
+        )}
         
         {input !== '' && error === null && show && (
           <pre className="code-display">
