@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useStore }            from '@/store/index.js'
 
-import type {
-  StoreParams,
-  RelayPolicy
-} from '@/types/index.js'
+import type { RelayPolicy } from '@/types/index.js'
 
-export default function ({ store } : StoreParams) {
-  const [ relays, setRelays ]   = useState<RelayPolicy[]>(store.get().relays)
+export function RelayConfig() {
+  const store = useStore()
+
+  const [ relays, setRelays ]   = useState<RelayPolicy[]>(store.data.relays)
   const [ relayUrl, setUrl ]    = useState('')
   const [ changes, setChanges ] = useState<boolean>(false)
   const [ error, setError ]     = useState<string | null>(null)
@@ -23,7 +23,7 @@ export default function ({ store } : StoreParams) {
 
   // Discard changes by resetting local state from store
   const cancel = () => {
-    setRelays(store.get().relays)
+    setRelays(store.data.relays)
     setChanges(false)
   }
   
@@ -59,16 +59,6 @@ export default function ({ store } : StoreParams) {
     setRelays(prev => prev.filter((_, i) => i !== idx))
     setChanges(true)
   }
-
-  useEffect(() => {
-    // Subscribe to store changes
-    const unsubscribe = store.subscribe(() => {
-      setRelays(store.get().relays)
-    })
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe()
-  }, [ store ])
 
   useEffect(() => {
     if (error !== null) setError(null)

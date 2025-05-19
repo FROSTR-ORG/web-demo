@@ -817,7 +817,7 @@ var require_react_development = __commonJS({
           }
           return children;
         }
-        function createContext(defaultValue) {
+        function createContext2(defaultValue) {
           var context = {
             $$typeof: REACT_CONTEXT_TYPE,
             // As a workaround to support multiple concurrent renderers, we categorize
@@ -1103,7 +1103,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher;
         }
-        function useContext(Context) {
+        function useContext2(Context) {
           var dispatcher = resolveDispatcher();
           {
             if (Context._context !== void 0) {
@@ -1125,11 +1125,11 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useReducer(reducer, initialArg, init);
         }
-        function useRef(initialValue) {
+        function useRef2(initialValue) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useRef(initialValue);
         }
-        function useEffect6(create, deps) {
+        function useEffect4(create, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useEffect(create, deps);
         }
@@ -1145,7 +1145,7 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useCallback(callback, deps);
         }
-        function useMemo(create, deps) {
+        function useMemo2(create, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useMemo(create, deps);
         }
@@ -1898,7 +1898,7 @@ var require_react_development = __commonJS({
         exports.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = ReactSharedInternals;
         exports.act = act;
         exports.cloneElement = cloneElement$1;
-        exports.createContext = createContext;
+        exports.createContext = createContext2;
         exports.createElement = createElement$1;
         exports.createFactory = createFactory;
         exports.createRef = createRef;
@@ -1909,17 +1909,17 @@ var require_react_development = __commonJS({
         exports.startTransition = startTransition;
         exports.unstable_act = act;
         exports.useCallback = useCallback;
-        exports.useContext = useContext;
+        exports.useContext = useContext2;
         exports.useDebugValue = useDebugValue;
         exports.useDeferredValue = useDeferredValue;
-        exports.useEffect = useEffect6;
+        exports.useEffect = useEffect4;
         exports.useId = useId;
         exports.useImperativeHandle = useImperativeHandle;
         exports.useInsertionEffect = useInsertionEffect;
         exports.useLayoutEffect = useLayoutEffect;
-        exports.useMemo = useMemo;
+        exports.useMemo = useMemo2;
         exports.useReducer = useReducer;
-        exports.useRef = useRef;
+        exports.useRef = useRef2;
         exports.useState = useState6;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
@@ -24498,10 +24498,10 @@ var require_react_jsx_runtime_development = __commonJS({
           }
         }
         var jsx10 = jsxWithValidationDynamic;
-        var jsxs9 = jsxWithValidationStatic;
+        var jsxs8 = jsxWithValidationStatic;
         exports.Fragment = REACT_FRAGMENT_TYPE;
         exports.jsx = jsx10;
-        exports.jsxs = jsxs9;
+        exports.jsxs = jsxs8;
       })();
     }
   }
@@ -24523,12 +24523,24 @@ var require_jsx_runtime = __commonJS({
 var import_react6 = __toESM(require_react());
 var import_client3 = __toESM(require_client());
 
-// src/class/store.ts
-var Store = class {
+// src/const.ts
+var STORE_KEY = "frostr-demo";
+var DEFAULT_STORE = {
+  creds: null,
+  relays: [],
+  peers: [],
+  logs: []
+};
+
+// src/store/controller.ts
+var DBController = class {
   constructor(store_key, defaults) {
     this._subs = /* @__PURE__ */ new Set();
     this._defaults = defaults;
     this._store_key = store_key;
+  }
+  get_defaults() {
+    return this._defaults;
   }
   get() {
     try {
@@ -24561,11 +24573,46 @@ var Store = class {
   }
 };
 
-// src/components/header.tsx
+// src/store/context.tsx
+var import_react = __toESM(require_react());
 var import_jsx_runtime = __toESM(require_jsx_runtime());
+function createStoreProvider(controller) {
+  const Context = (0, import_react.createContext)(null);
+  const StoreProvider2 = ({ children }) => {
+    const [_store, _setStore] = (0, import_react.useState)(controller.get());
+    const reset = () => {
+      controller.reset();
+      _setStore(controller.get_defaults());
+    };
+    const update = (store) => {
+      const new_store = __spreadValues(__spreadValues({}, _store), store);
+      controller.set(new_store);
+      _setStore(new_store);
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Context.Provider, { value: { data: _store, reset, update }, children });
+  };
+  const useStore2 = () => {
+    const ctx = (0, import_react.useContext)(Context);
+    if (ctx === null) {
+      throw new Error("useStore must be used within a StoreProvider");
+    }
+    return ctx;
+  };
+  return {
+    StoreProvider: StoreProvider2,
+    useStore: useStore2
+  };
+}
+
+// src/store/index.tsx
+var StoreDB = new DBController(STORE_KEY, DEFAULT_STORE);
+var { StoreProvider, useStore } = createStoreProvider(StoreDB);
+
+// src/components/header.tsx
+var import_jsx_runtime2 = __toESM(require_jsx_runtime());
 function Header() {
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "page-header", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "page-header", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
       "img",
       {
         src: "assets/frostr-icon.png",
@@ -24573,9 +24620,9 @@ function Header() {
         className: "frost-logo"
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "title-container", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "FROSTR Web Demo" }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "FROSTR Web Demo" }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "title-container", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h1", { children: "FROSTR Web Demo" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { children: "FROSTR Web Demo" }),
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
       "a",
       {
         href: "https://frostr.org",
@@ -24584,12 +24631,9 @@ function Header() {
         children: "https://frostr.org"
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "alpha-pill alpha-pill-standalone", children: "alpha edition" })
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "alpha-pill alpha-pill-standalone", children: "alpha edition" })
   ] });
 }
-
-// src/components/settings/group.tsx
-var import_react = __toESM(require_react());
 
 // node_modules/@noble/hashes/esm/crypto.js
 var crypto = typeof globalThis === "object" && "crypto" in globalThis ? globalThis.crypto : void 0;
@@ -25962,103 +26006,6 @@ var Stream = class {
     }
   }
 };
-
-// node_modules/@frostr/bifrost/dist/util/helpers.js
-var now = () => Math.floor(Date.now() / 1e3);
-function copy_obj(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
-function normalize_obj(obj) {
-  if (obj instanceof Map || Array.isArray(obj) || typeof obj !== "object") {
-    return obj;
-  } else {
-    return Object.keys(obj).sort().filter(([_, value]) => value !== void 0).reduce((sorted, key) => {
-      sorted[key] = obj[key];
-      return sorted;
-    }, {});
-  }
-}
-function parse_error(err) {
-  if (err instanceof Error)
-    return err.message;
-  if (typeof err === "string")
-    return err;
-  return String(err);
-}
-function validate_schema(obj, schema, err_msg) {
-  const parsed = schema.safeParse(obj);
-  if (parsed.success)
-    return true;
-  if (err_msg === void 0)
-    return false;
-  throw new Error(err_msg != null ? err_msg : "object failed schema validation");
-}
-
-// node_modules/@frostr/bifrost/dist/util/assert.js
-var Assert;
-(function(Assert3) {
-  function ok2(value, message) {
-    if (value === false)
-      throw new Error(message != null ? message : "Assertion failed!");
-  }
-  Assert3.ok = ok2;
-  function equal(actual, expected, err_msg) {
-    if (actual !== expected)
-      throw new Error(err_msg != null ? err_msg : "".concat(actual, " !== ").concat(expected));
-  }
-  Assert3.equal = equal;
-  function exists5(input, err_msg) {
-    if (typeof input === "undefined") {
-      throw new TypeError(err_msg != null ? err_msg : "Input is undefined!");
-    }
-    if (input === null) {
-      throw new TypeError(err_msg != null ? err_msg : "Input is null!");
-    }
-  }
-  Assert3.exists = exists5;
-  function size2(input, size3, err_msg) {
-    const bytes4 = Buff.bytes(input);
-    if (bytes4.length !== size3) {
-      throw new Error(err_msg != null ? err_msg : "Invalid byte size: ".concat(bytes4.hex, " !== ").concat(size3));
-    }
-    return true;
-  }
-  Assert3.size = size2;
-  function schema(schema2, input, err_msg) {
-    exists5(input);
-    validate_schema(input, schema2, err_msg != null ? err_msg : null);
-  }
-  Assert3.schema = schema;
-  function is_hex3(input) {
-    if (typeof input !== "string" || input.match(/[^a-fA-F0-9]/) !== null || input.length % 2 !== 0) {
-      throw new Error("invalid hex:" + input);
-    }
-  }
-  Assert3.is_hex = is_hex3;
-})(Assert || (Assert = {}));
-
-// node_modules/@frostr/bifrost/dist/util/parse.js
-var Parse;
-(function(Parse2) {
-  function error(err) {
-    if (err instanceof Error)
-      return err.message;
-    if (typeof err === "string")
-      return err;
-    return String(err);
-  }
-  Parse2.error = error;
-  function data(data2, schema) {
-    return schema.safeParse(data2);
-  }
-  Parse2.data = data;
-  function array(data2, schema) {
-    const parsed = data2.map((e) => schema.safeParse(e));
-    const errors = parsed.filter((e) => !e.success).map((e) => e.error.errors.map((x) => "".concat(x.message, ": ").concat(x.path)));
-    return errors.length !== 0 ? { ok: false, errors } : { ok: true, data: parsed.map((e) => e.data) };
-  }
-  Parse2.array = array;
-})(Parse || (Parse = {}));
 
 // node_modules/@noble/hashes/esm/hmac.js
 var HMAC = class extends Hash {
@@ -28016,645 +27963,613 @@ var schnorr = /* @__PURE__ */ (() => ({
   }
 }))();
 
-// node_modules/@frostr/bifrost/dist/lib/crypto.js
-var _N = secp256k1.CURVE.n;
-var FD = Field(_N, 32, true);
-var GP = secp256k1.ProjectivePoint.BASE;
-function get_seckey(secret, even_y = false) {
-  let sk = serialize_bytes(secret).big % _N;
-  if (even_y) {
-    const pt = GP.multiply(sk);
-    return pt.hasEvenY() ? Buff.big(sk).hex : Buff.big(_N - sk).hex;
-  } else {
-    return Buff.big(sk).hex;
+// node_modules/@noble/ciphers/esm/utils.js
+function isBytes4(a) {
+  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
+}
+function abool2(b) {
+  if (typeof b !== "boolean")
+    throw new Error("boolean expected, not ".concat(b));
+}
+function abytes4(b, ...lengths) {
+  if (!isBytes4(b))
+    throw new Error("Uint8Array expected");
+  if (lengths.length > 0 && !lengths.includes(b.length))
+    throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b.length);
+}
+function aexists2(instance, checkFinished = true) {
+  if (instance.destroyed)
+    throw new Error("Hash instance has been destroyed");
+  if (checkFinished && instance.finished)
+    throw new Error("Hash#digest() has already been called");
+}
+function aoutput2(out, instance) {
+  abytes4(out);
+  const min = instance.outputLen;
+  if (out.length < min) {
+    throw new Error("digestInto() expects output buffer of length at least " + min);
   }
 }
-function get_pubkey(seckey, format) {
-  const sk = serialize_bytes(seckey).big;
-  const pt = GP.multiply(sk);
-  const pk = pt.toHex(true);
-  return convert_pubkey(pk, format);
+function u8(arr) {
+  return new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength);
 }
-function tweak_seckey(seckey, tweak, even_y = false) {
-  const sk = serialize_bytes(seckey).big;
-  const twk = serialize_bytes(tweak).big;
-  const tweaked_sk = FD.add(sk, twk);
-  const new_secret = Buff.big(tweaked_sk);
-  return get_seckey(new_secret, even_y);
+function u32(arr) {
+  return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
 }
-function tweak_pubkey(pubkey2, tweak, even_y = false) {
-  const format = get_pubkey_format(pubkey2);
-  const twk_big = serialize_bytes(tweak).big;
-  const pub_pt = lift_pubkey(pubkey2);
-  const tweak_pt = GP.multiply(twk_big);
-  let tweaked_pt = pub_pt.add(tweak_pt);
-  if (even_y && !tweaked_pt.hasEvenY()) {
-    tweaked_pt = tweaked_pt.negate();
-  }
-  const pk = tweaked_pt.toHex(true);
-  return convert_pubkey(pk, format);
-}
-function lift_pubkey(pubkey2) {
-  try {
-    const pk = convert_pubkey(pubkey2, "ecdsa");
-    return secp256k1.ProjectivePoint.fromHex(pk);
-  } catch (err) {
-    throw new Error("invalid pubkey: " + pubkey2);
+function clean2(...arrays) {
+  for (let i2 = 0; i2 < arrays.length; i2++) {
+    arrays[i2].fill(0);
   }
 }
-function serialize_pubkey(pubkey2, format) {
-  try {
-    const pk = serialize_bytes(pubkey2);
-    if (pk.length === 33 && format === "bip340") {
-      return pk.slice(1);
-    } else if (pk.length === 32 && format === "ecdsa") {
-      return pk.prepend(2);
-    } else {
-      return pk;
+function createView2(arr) {
+  return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
+}
+var isLE = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
+function utf8ToBytes3(str3) {
+  if (typeof str3 !== "string")
+    throw new Error("string expected");
+  return new Uint8Array(new TextEncoder().encode(str3));
+}
+function toBytes2(data) {
+  if (typeof data === "string")
+    data = utf8ToBytes3(data);
+  else if (isBytes4(data))
+    data = copyBytes(data);
+  else
+    throw new Error("Uint8Array expected, got " + typeof data);
+  return data;
+}
+function equalBytes(a, b) {
+  if (a.length !== b.length)
+    return false;
+  let diff = 0;
+  for (let i2 = 0; i2 < a.length; i2++)
+    diff |= a[i2] ^ b[i2];
+  return diff === 0;
+}
+var wrapCipher = /* @__NO_SIDE_EFFECTS__ */ (params, constructor) => {
+  function wrappedCipher(key, ...args) {
+    abytes4(key);
+    if (!isLE)
+      throw new Error("Non little-endian hardware is not yet supported");
+    if (params.nonceLength !== void 0) {
+      const nonce = args[0];
+      if (!nonce)
+        throw new Error("nonce / iv required");
+      if (params.varSizeNonce)
+        abytes4(nonce);
+      else
+        abytes4(nonce, params.nonceLength);
     }
-  } catch (err) {
-    throw new Error("invalid pubkey: " + String(pubkey2));
-  }
-}
-function convert_pubkey(pubkey2, format) {
-  const pk = serialize_pubkey(pubkey2, format);
-  return pk.hex;
-}
-function get_pubkey_format(pubkey2) {
-  const pk = serialize_bytes(pubkey2);
-  if (pk.length === 33)
-    return "ecdsa";
-  if (pk.length === 32)
-    return "bip340";
-  throw new Error("invalid pubkey: " + String(pubkey2));
-}
-function serialize_bytes(bytes4) {
-  try {
-    return Buff.bytes(bytes4);
-  } catch (err) {
-    throw new Error("invalid bytes: " + String(bytes4));
-  }
-}
-
-// node_modules/@cmdcode/frost/dist/ecc/hash.js
-var hash_exports = {};
-__export(hash_exports, {
-  H1: () => H1,
-  H2: () => H2,
-  H3: () => H3,
-  H4: () => H4,
-  H5: () => H5
-});
-
-// node_modules/@cmdcode/frost/dist/const.js
-var _0n7 = BigInt(0);
-var _1n6 = BigInt(1);
-var _P = BigInt("0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f");
-var _N2 = BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
-var CURVE = secp256k1.CURVE;
-var FIELD = Field(_N2, 32, true);
-var POINT = secp256k1.ProjectivePoint;
-var DOMAIN = "FROST-secp256k1-SHA256-v1";
-var const_default = { _0n: _0n7, _1n: _1n6, _N: _N2, _P, CURVE, DOMAIN, FIELD, POINT };
-
-// node_modules/@cmdcode/frost/dist/ecc/util.js
-var { POINT: POINT2, _N: _N3, _P: _P2 } = const_default;
-function mod_n(x) {
-  return mod(x, _N3);
-}
-function str_to_bytes(str3) {
-  return new TextEncoder().encode(str3);
-}
-function lift_x2(pubkey2) {
-  let bytes4 = Buff.bytes(pubkey2);
-  if (bytes4.length < 32 || bytes4.length > 33) {
-    throw new Error("invalid pubkeky: " + bytes4.hex + " " + bytes4.length);
-  } else if (bytes4.length === 32) {
-    bytes4 = bytes4.prepend(2);
-  }
-  return POINT2.fromHex(bytes4.hex);
-}
-
-// node_modules/@cmdcode/frost/dist/ecc/hash.js
-var OPT = { m: 1, p: _N2, k: 128, expand: "xmd", hash: sha2562 };
-function get_opts(DST) {
-  return __spreadProps(__spreadValues({}, OPT), { DST });
-}
-function H1(msg) {
-  const DST = DOMAIN + "rho";
-  const nums = hash_to_field(msg, 1, get_opts(DST));
-  return Buff.big(nums[0][0], 32);
-}
-function H2(msg) {
-  const DST = DOMAIN + "chal";
-  const nums = hash_to_field(msg, 1, get_opts(DST));
-  return Buff.big(nums[0][0], 32);
-}
-function H3(msg) {
-  const DST = DOMAIN + "nonce";
-  const nums = hash_to_field(msg, 1, get_opts(DST));
-  return Buff.big(nums[0][0], 32);
-}
-function H4(msg) {
-  const DST = str_to_bytes(DOMAIN + "msg");
-  const hash3 = sha2562(new Uint8Array([...DST, ...msg]));
-  return new Buff(hash3);
-}
-function H5(msg) {
-  const DST = str_to_bytes(DOMAIN + "com");
-  const hash3 = sha2562(new Uint8Array([...DST, ...msg]));
-  return new Buff(hash3);
-}
-
-// node_modules/@cmdcode/frost/dist/ecc/group.js
-var group_exports = {};
-__export(group_exports, {
-  DeserializeElement: () => DeserializeElement,
-  DeserializeScalar: () => DeserializeScalar,
-  ElementAdd: () => ElementAdd,
-  ElementAddMany: () => ElementAddMany,
-  Identity: () => Identity,
-  Order: () => Order,
-  RandomScalar: () => RandomScalar,
-  ScalarBaseMulti: () => ScalarBaseMulti,
-  ScalarMulti: () => ScalarMulti,
-  SerializeElement: () => SerializeElement,
-  SerializeScalar: () => SerializeScalar
-});
-
-// node_modules/@cmdcode/frost/dist/util/assert.js
-var assert_exports2 = {};
-__export(assert_exports2, {
-  equal_arr_size: () => equal_arr_size,
-  exists: () => exists,
-  is_equal_set: () => is_equal_set,
-  is_included: () => is_included,
-  is_unique_set: () => is_unique_set,
-  ok: () => ok,
-  size: () => size
-});
-function ok(value, message) {
-  if (value === false)
-    throw new Error(message != null ? message : "Assertion failed!");
-}
-function exists(input) {
-  if (typeof input === "undefined") {
-    throw new TypeError("Input is undefined!");
-  }
-  if (input === null) {
-    throw new TypeError("Input is null!");
-  }
-}
-function size(input, size2) {
-  const bytes4 = Buff.bytes(input);
-  if (bytes4.length !== size2) {
-    throw new Error("Invalid byte size: ".concat(bytes4.hex, " !== ").concat(size2));
-  }
-  return true;
-}
-function is_included(array, item) {
-  if (!array.includes(item)) {
-    throw new Error("item is not included in array");
-  }
-}
-function is_unique_set(array) {
-  for (const x of array) {
-    const c = array.filter((e) => e === x).length;
-    if (c !== 1) {
-      throw new Error("item in set is not unique: " + String(x));
+    const tagl = params.tagLength;
+    if (tagl && args[1] !== void 0) {
+      abytes4(args[1]);
     }
+    const cipher = constructor(key, ...args);
+    const checkOutput = (fnLength, output4) => {
+      if (output4 !== void 0) {
+        if (fnLength !== 2)
+          throw new Error("cipher output not supported");
+        abytes4(output4);
+      }
+    };
+    let called = false;
+    const wrCipher = {
+      encrypt(data, output4) {
+        if (called)
+          throw new Error("cannot encrypt() twice with same key + nonce");
+        called = true;
+        abytes4(data);
+        checkOutput(cipher.encrypt.length, output4);
+        return cipher.encrypt(data, output4);
+      },
+      decrypt(data, output4) {
+        abytes4(data);
+        if (tagl && data.length < tagl)
+          throw new Error("invalid ciphertext length: smaller than tagLength=" + tagl);
+        checkOutput(cipher.decrypt.length, output4);
+        return cipher.decrypt(data, output4);
+      }
+    };
+    return wrCipher;
   }
+  Object.assign(wrappedCipher, params);
+  return wrappedCipher;
+};
+function getOutput(expectedLength, out, onlyAligned = true) {
+  if (out === void 0)
+    return new Uint8Array(expectedLength);
+  if (out.length !== expectedLength)
+    throw new Error("invalid output length, expected " + expectedLength + ", got: " + out.length);
+  if (onlyAligned && !isAligned32(out))
+    throw new Error("invalid output, must be aligned");
+  return out;
 }
-function is_equal_set(array) {
-  if (!array.every((e) => e === array[0])) {
-    throw new Error("set does not have equal items");
-  }
+function setBigUint642(view, byteOffset, value, isLE5) {
+  if (typeof view.setBigUint64 === "function")
+    return view.setBigUint64(byteOffset, value, isLE5);
+  const _32n = BigInt(32);
+  const _u32_max = BigInt(4294967295);
+  const wh = Number(value >> _32n & _u32_max);
+  const wl = Number(value & _u32_max);
+  const h = isLE5 ? 4 : 0;
+  const l = isLE5 ? 0 : 4;
+  view.setUint32(byteOffset + h, wh, isLE5);
+  view.setUint32(byteOffset + l, wl, isLE5);
 }
-function equal_arr_size(array_a, array_b) {
-  if (array_a.length !== array_b.length) {
-    throw new Error("array lengths are unequal: ".concat(array_a.length, " !== ").concat(array_b.length));
-  }
+function u64Lengths(dataLength, aadLength, isLE5) {
+  abool2(isLE5);
+  const num4 = new Uint8Array(16);
+  const view = createView2(num4);
+  setBigUint642(view, 0, BigInt(aadLength), isLE5);
+  setBigUint642(view, 8, BigInt(dataLength), isLE5);
+  return num4;
+}
+function isAligned32(bytes4) {
+  return bytes4.byteOffset % 4 === 0;
+}
+function copyBytes(bytes4) {
+  return Uint8Array.from(bytes4);
 }
 
-// node_modules/@cmdcode/frost/dist/util/helpers.js
-function taghash(tag) {
-  const hash3 = Buff.str(tag).digest;
-  return Buff.join([hash3, hash3]);
-}
-function hash340(tag, ...data) {
-  const hash3 = taghash(tag);
-  const bytes4 = data.map((e) => Buff.bytes(e));
-  return Buff.join([hash3, ...bytes4]).digest;
-}
-
-// node_modules/@cmdcode/frost/dist/ecc/group.js
-var { POINT: POINT3, _0n: _0n8, _1n: _1n7, _N: _N4 } = const_default;
-function Order() {
-  return _N4;
-}
-function Identity() {
-  return new POINT3(_0n8, _1n7, _0n8);
-}
-function RandomScalar() {
-  const bigint = Buff.random(32).big;
-  return mod_n(bigint);
-}
-function ElementAdd(A, B) {
-  if (A === null && B === null) {
-    throw new Error("both points are null!");
-  } else if (A === null) {
-    assert_exports2.exists(B);
-    return B;
-  } else if (B === null) {
-    return A;
-  } else {
-    const C = A.add(B);
-    C.assertValidity();
-    return C;
-  }
-}
-function ElementAddMany(elem) {
-  const sum = elem.slice(1).reduce((p, c) => ElementAdd(p, c), elem[0]);
-  if (sum === null) {
-    throw new Error("Summed point is null.");
-  }
-  sum.assertValidity();
-  return sum;
-}
-function ScalarMulti(A, k) {
-  const pt = A.multiply(k);
-  pt.assertValidity();
-  return pt;
-}
-function ScalarBaseMulti(k) {
-  const base = secp256k1.ProjectivePoint.BASE;
-  const pt = base.multiply(k);
-  pt.assertValidity();
-  return pt;
-}
-function SerializeElement(A) {
-  return Buff.bytes(A.toRawBytes(true));
-}
-function DeserializeElement(bytes4) {
-  const hex4 = Buff.bytes(bytes4).hex;
-  return POINT3.fromHex(hex4);
-}
-function SerializeScalar(scalar) {
-  return new Buff(scalar, 32);
-}
-function DeserializeScalar(bytes4) {
-  return Buff.bytes(bytes4).big;
-}
-
-// node_modules/@cmdcode/frost/dist/lib/helpers.js
-function get_pubkey2(secret) {
-  const scalar = Buff.bytes(secret).big;
-  const point = group_exports.ScalarBaseMulti(scalar);
-  return group_exports.SerializeElement(point).hex;
-}
-function get_challenge(pnonce, pubkey2, message) {
-  const grp_pk = convert_pubkey2(pubkey2, "bip340");
-  const grp_pn = convert_pubkey2(pnonce, "bip340");
-  assert_exports2.size(grp_pk, 32);
-  assert_exports2.size(grp_pn, 32);
-  const digest = hash340("BIP0340/challenge", grp_pn, grp_pk, message);
-  return digest.big;
-}
-function convert_pubkey2(pubkey2, type) {
-  const pub = Buff.bytes(pubkey2);
-  if (type === "ecdsa") {
-    return pub.length === 32 ? pub.prepend(2).hex : pub.hex;
-  } else if (type === "bip340") {
-    return pub.length === 33 ? pub.slice(1).hex : pub.hex;
-  } else {
-    throw new Error("invalid pubkey type");
-  }
-}
-
-// node_modules/@cmdcode/frost/dist/lib/commit.js
-function get_nonce_ids(pnonces) {
-  return pnonces.map((pn) => BigInt(pn.idx));
-}
-function get_commits_prefix(pnonces) {
-  let enc_group_commit = [];
-  const sorted_pnonces = pnonces.sort((a, b) => a.idx - b.idx);
-  for (const { idx, hidden_pn, binder_pn } of sorted_pnonces) {
-    const enc_commit = [group_exports.SerializeScalar(idx), hidden_pn, binder_pn];
-    enc_group_commit = [...enc_group_commit, ...enc_commit];
-  }
-  return Buff.join(enc_group_commit);
-}
-function get_group_prefix(pnonces, group_pk, message) {
-  const msg_bytes = Buff.hex(message);
-  const msg_hash = hash_exports.H4(msg_bytes);
-  const commit_list = get_commits_prefix(pnonces);
-  const commit_hash = hash_exports.H5(commit_list);
-  return Buff.join([group_pk, msg_hash, commit_hash]);
-}
-function get_bind_factor(binders, idx) {
-  for (const bind of binders) {
-    if (idx === bind.idx) {
-      return Buff.bytes(bind.factor).big;
-    }
-  }
-  throw new Error("invalid participant");
-}
-function get_group_binders(nonces, prefix) {
-  return nonces.map(({ idx }) => {
-    const scalar = group_exports.SerializeScalar(idx);
-    const rho_input = Buff.join([prefix, scalar]);
-    return { idx, factor: hash_exports.H1(rho_input).hex };
-  });
-}
-function get_group_pubnonce(pnonces, binders) {
-  let group_commit = null;
-  for (const { idx, binder_pn, hidden_pn } of pnonces) {
-    const hidden_elem = group_exports.DeserializeElement(hidden_pn);
-    const binding_elem = group_exports.DeserializeElement(binder_pn);
-    const bind_factor = get_bind_factor(binders, idx);
-    const factored_elem = group_exports.ScalarMulti(binding_elem, bind_factor);
-    group_commit = group_exports.ElementAdd(group_commit, hidden_elem);
-    group_commit = group_exports.ElementAdd(group_commit, factored_elem);
-  }
-  assert_exports2.exists(group_commit);
-  return group_exports.SerializeElement(group_commit).hex;
-}
-
-// node_modules/@cmdcode/frost/dist/ecc/state.js
-function get_point_state(element, tweaks = []) {
-  const ints = tweaks.map((e) => Buff.bytes(e).big);
-  const pos = _1n6;
-  const neg = _N2 - pos;
-  let point = element, parity = pos, state = pos, tweak = _0n7;
-  for (const t of ints) {
-    const tG = ScalarBaseMulti(t);
-    parity = point.hasEvenY() ? pos : neg;
-    point = parity === neg ? point.negate() : point;
-    point = ElementAdd(point, tG);
-    point.assertValidity();
-    state = mod_n(parity * state);
-    tweak = mod_n(t + parity * tweak);
-  }
-  parity = point.hasEvenY() ? pos : neg;
-  return { parity, point, state, tweak };
-}
-
-// node_modules/@cmdcode/frost/dist/lib/context.js
-function get_group_key_context(pubkey2, tweaks) {
-  const int_pk = Buff.bytes(pubkey2).hex;
-  const int_pt = lift_x2(int_pk);
-  const group_pt = get_point_state(int_pt, tweaks);
-  const group_pk = group_pt.point.toHex(true);
-  return { int_pk, int_pt, group_pk, group_pt };
-}
-function get_group_commit_context(key_ctx, pnonces, message) {
-  const group_pubkey = key_ctx.group_pk;
-  const bind_prefix = get_group_prefix(pnonces, group_pubkey, message).hex;
-  const bind_factors = get_group_binders(pnonces, bind_prefix);
-  const group_pn = get_group_pubnonce(pnonces, bind_factors);
-  const indexes = get_nonce_ids(pnonces);
-  const challenge3 = get_challenge(group_pn, group_pubkey, message);
-  message = Buff.bytes(message).hex;
-  return { bind_prefix, bind_factors, challenge: challenge3, pnonces, group_pn, indexes, message };
-}
-function get_group_signing_ctx(group_pk, pnonces, message, tweaks) {
-  const key_ctx = get_group_key_context(group_pk, tweaks);
-  const com_ctx = get_group_commit_context(key_ctx, pnonces, message);
-  return __spreadValues(__spreadValues({}, key_ctx), com_ctx);
-}
-
-// node_modules/@cmdcode/frost/dist/lib/poly.js
-function interpolate_x(L, x) {
-  assert_exports2.is_included(L, x);
-  assert_exports2.is_unique_set(L);
-  let numerator = _1n6, denominator = _1n6;
-  for (const x_j of L) {
-    if (x_j === x)
-      continue;
-    numerator = mod_n(FIELD.mul(numerator, x_j));
-    denominator = mod_n(FIELD.mul(denominator, x_j - x));
-  }
-  return mod_n(FIELD.div(numerator, denominator));
-}
-function calc_lagrange_coeff(L, P, x) {
-  assert_exports2.is_unique_set(L);
-  let numerator = _1n6, denominator = _1n6;
-  for (const x_j of L) {
-    if (x_j === P)
-      continue;
-    numerator = mod_n(FIELD.mul(numerator, x - x_j));
-    denominator = mod_n(FIELD.mul(denominator, P - x_j));
-  }
-  return mod_n(FIELD.div(numerator, denominator));
-}
-
-// node_modules/@cmdcode/frost/dist/lib/ecdh.js
-function create_ecdh_share(members, share2, pubkey2) {
-  const mbrs = members.filter((idx2) => idx2 !== share2.idx).map((i2) => BigInt(i2));
-  const idx = BigInt(share2.idx);
-  const secret = Buff.hex(share2.seckey).big;
-  const point = lift_x2(pubkey2);
-  const L_coeff = calc_lagrange_coeff(mbrs, idx, _0n7);
-  const P_coeff = mod_n(L_coeff * secret);
-  const ecdh_pt = point.multiply(P_coeff);
-  const ecdh_pk = group_exports.SerializeElement(ecdh_pt).hex;
-  return { idx: share2.idx, pubkey: ecdh_pk };
-}
-function derive_ecdh_secret(shares) {
-  let point = null;
-  for (const share2 of shares) {
-    if (point === null) {
-      point = lift_x2(share2.pubkey);
-    } else {
-      const pt = lift_x2(share2.pubkey);
-      point = point.add(pt);
-    }
-  }
-  assert_exports2.exists(point);
-  return group_exports.SerializeElement(point).hex;
-}
-
-// node_modules/@cmdcode/frost/dist/lib/sign.js
-function sign_msg(ctx, share2, snonce) {
-  const { bind_factors, challenge: challenge3, indexes, group_pt: Q } = ctx;
-  const bind_factor = get_bind_factor(bind_factors, share2.idx);
-  const coefficient = interpolate_x(indexes, BigInt(share2.idx));
-  if (snonce.idx !== share2.idx) {
-    throw new Error("commit index does not match share index: ".concat(snonce.idx, " !== ").concat(share2.idx));
-  }
-  let snonce_h = Buff.bytes(snonce.hidden_sn).big, snonce_b = Buff.bytes(snonce.binder_sn).big, seckey = Buff.bytes(share2.seckey).big;
-  const R_elem = lift_x2(ctx.group_pn);
-  if (!R_elem.hasEvenY()) {
-    snonce_h = CURVE.n - snonce_h;
-    snonce_b = CURVE.n - snonce_b;
-  }
-  const sk = mod_n(Q.parity * Q.state * seckey);
-  const nk = mod_n(snonce_h + snonce_b * bind_factor);
-  const ps = mod_n(challenge3 * coefficient * sk + nk);
+// node_modules/@noble/ciphers/esm/_polyval.js
+var BLOCK_SIZE = 16;
+var ZEROS16 = /* @__PURE__ */ new Uint8Array(16);
+var ZEROS32 = u32(ZEROS16);
+var POLY = 225;
+var mul2 = (s0, s1, s2, s3) => {
+  const hiBit = s3 & 1;
   return {
-    idx: share2.idx,
-    psig: Buff.big(ps, 32).hex,
-    pubkey: get_pubkey2(share2.seckey)
+    s3: s2 << 31 | s3 >>> 1,
+    s2: s1 << 31 | s2 >>> 1,
+    s1: s0 << 31 | s1 >>> 1,
+    s0: s0 >>> 1 ^ POLY << 24 & -(hiBit & 1)
+    // reduce % poly
   };
-}
-function combine_partial_sigs(context, psigs) {
-  const { challenge: challenge3, pnonces, group_pt: Q, group_pk, message } = context;
-  const commit_prefix = get_group_prefix(pnonces, group_pk, message);
-  const group_binders = get_group_binders(pnonces, commit_prefix);
-  const group_pnonce = get_group_pubnonce(pnonces, group_binders);
-  const ps = psigs.map((e) => Buff.hex(e.psig).big).reduce((acc, nxt) => mod_n(acc + nxt), _0n7);
-  const twk = mod_n(challenge3 * Q.parity * Q.tweak);
-  const s = mod_n(ps + twk);
-  return Buff.join([group_pnonce.slice(2), Buff.big(s, 32)]).hex;
-}
-function verify_partial_sig(ctx, pnonce, share_pk, share_psig) {
-  const { bind_factors, challenge: challenge3, indexes, group_pn, group_pt: Q } = ctx;
-  const binder = get_bind_factor(bind_factors, pnonce.idx);
-  let hidden_elem = lift_x2(pnonce.hidden_pn), binder_elem = lift_x2(pnonce.binder_pn), public_elem = lift_x2(share_pk);
-  const R_elem = lift_x2(group_pn);
-  if (!R_elem.hasEvenY()) {
-    hidden_elem = group_exports.ScalarMulti(hidden_elem, CURVE.n - _1n6);
-    binder_elem = group_exports.ScalarMulti(binder_elem, CURVE.n - _1n6);
+};
+var swapLE = (n) => (n >>> 0 & 255) << 24 | (n >>> 8 & 255) << 16 | (n >>> 16 & 255) << 8 | n >>> 24 & 255 | 0;
+function _toGHASHKey(k) {
+  k.reverse();
+  const hiBit = k[15] & 1;
+  let carry = 0;
+  for (let i2 = 0; i2 < k.length; i2++) {
+    const t = k[i2];
+    k[i2] = t >>> 1 | carry;
+    carry = (t & 1) << 7;
   }
-  const commit_elem = group_exports.ScalarMulti(binder_elem, binder);
-  const nonce_elem = group_exports.ElementAdd(hidden_elem, commit_elem);
-  const lambda_i = interpolate_x(indexes, BigInt(pnonce.idx));
-  const state = mod_n(Q.parity * Q.state);
-  const chal = mod_n(challenge3 * lambda_i * state);
-  const sig = Buff.hex(share_psig).big;
-  const sG = group_exports.ScalarBaseMulti(sig);
-  const pki = group_exports.ScalarMulti(public_elem, chal);
-  const R = group_exports.ElementAdd(nonce_elem, pki);
-  return sG.x === R.x;
+  k[0] ^= -hiBit & 225;
+  return k;
 }
-
-// node_modules/@frostr/bifrost/dist/lib/group.js
-function get_group_id(group2) {
-  const prefix = get_commits_prefix(group2.commits);
-  const preimg = Buff.join([prefix, group2.group_pk]);
-  return preimg.digest.hex;
-}
-function get_commit_by_idx(commits, idx) {
-  const commit3 = commits.find((e) => e.idx === idx);
-  Assert.exists(commit3, "commit package not found for idx: " + idx);
-  return commit3;
-}
-
-// node_modules/@frostr/bifrost/dist/const.js
-var COMMIT_INDEX_SIZE = 4;
-var COMMIT_PUBKEY_SIZE = 33;
-var COMMIT_PNONCE_SIZE = 33;
-var COMMIT_DATA_SIZE = 103;
-var GROUP_DATA_SIZE = 37;
-var GROUP_PUBKEY_SIZE = 33;
-var GROUP_THOLD_SIZE = 4;
-var SHARE_DATA_SIZE = 100;
-var SHARE_INDEX_SIZE = 4;
-var SHARE_SECKEY_SIZE = 32;
-var SHARE_SNONCE_SIZE = 32;
-
-// node_modules/@frostr/bifrost/dist/lib/encoder.js
-function encode_group_pkg(pkg) {
-  const thd = Buff.num(pkg.threshold, GROUP_THOLD_SIZE);
-  const gpk = Buff.hex(pkg.group_pk, GROUP_PUBKEY_SIZE);
-  const com = pkg.commits.map((e) => serialize_commit_data(e));
-  const data = Buff.join([gpk, thd, ...com]);
-  Assert.size(data, GROUP_DATA_SIZE + com.length * COMMIT_DATA_SIZE);
-  return data.to_bech32m("bfgroup");
-}
-function decode_group_pkg(str3) {
-  const stream = Buff.bech32m(str3).stream;
-  const group_pk = stream.read(COMMIT_PUBKEY_SIZE).hex;
-  const threshold = stream.read(GROUP_THOLD_SIZE).num;
-  Assert.ok(stream.size % COMMIT_DATA_SIZE === 0, "commit data is malformed");
-  const count = stream.size / COMMIT_DATA_SIZE;
-  const commits = [];
-  for (let i2 = 0; i2 < count; i2++) {
-    const cbytes = stream.read(COMMIT_DATA_SIZE);
-    commits.push(deserialize_commit_data(cbytes));
+var estimateWindow = (bytes4) => {
+  if (bytes4 > 64 * 1024)
+    return 8;
+  if (bytes4 > 1024)
+    return 4;
+  return 2;
+};
+var GHASH = class {
+  // We select bits per window adaptively based on expectedLength
+  constructor(key, expectedLength) {
+    this.blockLen = BLOCK_SIZE;
+    this.outputLen = BLOCK_SIZE;
+    this.s0 = 0;
+    this.s1 = 0;
+    this.s2 = 0;
+    this.s3 = 0;
+    this.finished = false;
+    key = toBytes2(key);
+    abytes4(key, 16);
+    const kView = createView2(key);
+    let k0 = kView.getUint32(0, false);
+    let k1 = kView.getUint32(4, false);
+    let k2 = kView.getUint32(8, false);
+    let k3 = kView.getUint32(12, false);
+    const doubles = [];
+    for (let i2 = 0; i2 < 128; i2++) {
+      doubles.push({ s0: swapLE(k0), s1: swapLE(k1), s2: swapLE(k2), s3: swapLE(k3) });
+      ({ s0: k0, s1: k1, s2: k2, s3: k3 } = mul2(k0, k1, k2, k3));
+    }
+    const W = estimateWindow(expectedLength || 1024);
+    if (![1, 2, 4, 8].includes(W))
+      throw new Error("ghash: invalid window size, expected 2, 4 or 8");
+    this.W = W;
+    const bits = 128;
+    const windows = bits / W;
+    const windowSize = this.windowSize = 2 ** W;
+    const items = [];
+    for (let w = 0; w < windows; w++) {
+      for (let byte = 0; byte < windowSize; byte++) {
+        let s0 = 0, s1 = 0, s2 = 0, s3 = 0;
+        for (let j = 0; j < W; j++) {
+          const bit = byte >>> W - j - 1 & 1;
+          if (!bit)
+            continue;
+          const { s0: d0, s1: d1, s2: d2, s3: d3 } = doubles[W * w + j];
+          s0 ^= d0, s1 ^= d1, s2 ^= d2, s3 ^= d3;
+        }
+        items.push({ s0, s1, s2, s3 });
+      }
+    }
+    this.t = items;
   }
-  Assert.size(stream.data, 0);
-  return normalize_obj({ commits, group_pk, threshold });
-}
-function encode_share_pkg(pkg) {
-  const idx = Buff.num(pkg.idx, SHARE_INDEX_SIZE);
-  const ssk = Buff.hex(pkg.seckey, SHARE_SECKEY_SIZE);
-  const bsn = Buff.hex(pkg.binder_sn, SHARE_SNONCE_SIZE);
-  const hsn = Buff.hex(pkg.hidden_sn, SHARE_SNONCE_SIZE);
-  const data = Buff.join([idx, ssk, bsn, hsn]);
-  Assert.size(data, SHARE_DATA_SIZE);
-  return data.to_bech32m("bfshare");
-}
-function decode_share_pkg(sharestr) {
-  const stream = Buff.bech32m(sharestr).stream;
-  Assert.size(stream.data, SHARE_DATA_SIZE);
-  const idx = stream.read(SHARE_INDEX_SIZE).num;
-  const seckey = stream.read(SHARE_SECKEY_SIZE).hex;
-  const binder_sn = stream.read(SHARE_SNONCE_SIZE).hex;
-  const hidden_sn = stream.read(SHARE_SNONCE_SIZE).hex;
-  Assert.size(stream.data, 0);
-  return normalize_obj({ idx, binder_sn, hidden_sn, seckey });
-}
-function serialize_commit_data(pkg) {
-  const idx = Buff.num(pkg.idx, COMMIT_INDEX_SIZE);
-  const spk = Buff.hex(pkg.pubkey, COMMIT_PUBKEY_SIZE);
-  const bpn = Buff.hex(pkg.binder_pn, COMMIT_PNONCE_SIZE);
-  const hpn = Buff.hex(pkg.hidden_pn, COMMIT_PNONCE_SIZE);
-  return Buff.join([idx, spk, bpn, hpn]);
-}
-function deserialize_commit_data(data) {
-  const stream = new Buff(data).stream;
-  Assert.size(stream.data, COMMIT_DATA_SIZE);
-  const idx = stream.read(COMMIT_INDEX_SIZE).num;
-  const pubkey2 = stream.read(COMMIT_PUBKEY_SIZE).hex;
-  const binder_pn = stream.read(COMMIT_PNONCE_SIZE).hex;
-  const hidden_pn = stream.read(COMMIT_PNONCE_SIZE).hex;
-  Assert.size(stream.data, 0);
-  return { idx, binder_pn, hidden_pn, pubkey: pubkey2 };
-}
-
-// node_modules/@frostr/bifrost/dist/lib/ecdh.js
-function create_ecdh_pkg(members, ecdh_pk, secshare) {
-  const ecdh_share = create_ecdh_share(members, secshare, ecdh_pk);
-  return { idx: ecdh_share.idx, keyshare: ecdh_share.pubkey, members, ecdh_pk };
-}
-function combine_ecdh_pkgs(pkgs) {
-  const keyshares = pkgs.map((e) => {
-    return { idx: e.idx, pubkey: e.keyshare };
-  });
-  return derive_ecdh_secret(keyshares);
-}
-
-// node_modules/@frostr/bifrost/dist/lib/sighash.js
-function format_sigvector(message) {
-  if (Array.isArray(message)) {
-    return message;
-  } else if (typeof message === "string") {
-    return [message];
-  } else {
-    throw new Error("invalid message payload");
+  _updateBlock(s0, s1, s2, s3) {
+    s0 ^= this.s0, s1 ^= this.s1, s2 ^= this.s2, s3 ^= this.s3;
+    const { W, t, windowSize } = this;
+    let o0 = 0, o1 = 0, o2 = 0, o3 = 0;
+    const mask = (1 << W) - 1;
+    let w = 0;
+    for (const num4 of [s0, s1, s2, s3]) {
+      for (let bytePos = 0; bytePos < 4; bytePos++) {
+        const byte = num4 >>> 8 * bytePos & 255;
+        for (let bitPos = 8 / W - 1; bitPos >= 0; bitPos--) {
+          const bit = byte >>> W * bitPos & mask;
+          const { s0: e0, s1: e1, s2: e2, s3: e3 } = t[w * windowSize + bit];
+          o0 ^= e0, o1 ^= e1, o2 ^= e2, o3 ^= e3;
+          w += 1;
+        }
+      }
+    }
+    this.s0 = o0;
+    this.s1 = o1;
+    this.s2 = o2;
+    this.s3 = o3;
   }
+  update(data) {
+    aexists2(this);
+    data = toBytes2(data);
+    abytes4(data);
+    const b32 = u32(data);
+    const blocks = Math.floor(data.length / BLOCK_SIZE);
+    const left = data.length % BLOCK_SIZE;
+    for (let i2 = 0; i2 < blocks; i2++) {
+      this._updateBlock(b32[i2 * 4 + 0], b32[i2 * 4 + 1], b32[i2 * 4 + 2], b32[i2 * 4 + 3]);
+    }
+    if (left) {
+      ZEROS16.set(data.subarray(blocks * BLOCK_SIZE));
+      this._updateBlock(ZEROS32[0], ZEROS32[1], ZEROS32[2], ZEROS32[3]);
+      clean2(ZEROS32);
+    }
+    return this;
+  }
+  destroy() {
+    const { t } = this;
+    for (const elm of t) {
+      elm.s0 = 0, elm.s1 = 0, elm.s2 = 0, elm.s3 = 0;
+    }
+  }
+  digestInto(out) {
+    aexists2(this);
+    aoutput2(out, this);
+    this.finished = true;
+    const { s0, s1, s2, s3 } = this;
+    const o32 = u32(out);
+    o32[0] = s0;
+    o32[1] = s1;
+    o32[2] = s2;
+    o32[3] = s3;
+    return out;
+  }
+  digest() {
+    const res = new Uint8Array(BLOCK_SIZE);
+    this.digestInto(res);
+    this.destroy();
+    return res;
+  }
+};
+var Polyval = class extends GHASH {
+  constructor(key, expectedLength) {
+    key = toBytes2(key);
+    abytes4(key);
+    const ghKey = _toGHASHKey(copyBytes(key));
+    super(ghKey, expectedLength);
+    clean2(ghKey);
+  }
+  update(data) {
+    data = toBytes2(data);
+    aexists2(this);
+    const b32 = u32(data);
+    const left = data.length % BLOCK_SIZE;
+    const blocks = Math.floor(data.length / BLOCK_SIZE);
+    for (let i2 = 0; i2 < blocks; i2++) {
+      this._updateBlock(swapLE(b32[i2 * 4 + 3]), swapLE(b32[i2 * 4 + 2]), swapLE(b32[i2 * 4 + 1]), swapLE(b32[i2 * 4 + 0]));
+    }
+    if (left) {
+      ZEROS16.set(data.subarray(blocks * BLOCK_SIZE));
+      this._updateBlock(swapLE(ZEROS32[3]), swapLE(ZEROS32[2]), swapLE(ZEROS32[1]), swapLE(ZEROS32[0]));
+      clean2(ZEROS32);
+    }
+    return this;
+  }
+  digestInto(out) {
+    aexists2(this);
+    aoutput2(out, this);
+    this.finished = true;
+    const { s0, s1, s2, s3 } = this;
+    const o32 = u32(out);
+    o32[0] = s0;
+    o32[1] = s1;
+    o32[2] = s2;
+    o32[3] = s3;
+    return out.reverse();
+  }
+};
+function wrapConstructorWithKey(hashCons) {
+  const hashC = (msg, key) => hashCons(key, msg.length).update(toBytes2(msg)).digest();
+  const tmp = hashCons(new Uint8Array(16), 0);
+  hashC.outputLen = tmp.outputLen;
+  hashC.blockLen = tmp.blockLen;
+  hashC.create = (key, expectedLength) => hashCons(key, expectedLength);
+  return hashC;
 }
-function create_sighash_commit(session_id, commit3, sigvec) {
-  const bind_hash = get_sighash_binder(session_id, commit3.idx, sigvec);
-  const hidden_pn = tweak_pubkey(commit3.hidden_pn, bind_hash);
-  const binder_pn = tweak_pubkey(commit3.binder_pn, bind_hash);
-  const [sighash] = sigvec;
-  return __spreadProps(__spreadValues({}, commit3), { binder_pn, hidden_pn, bind_hash, sighash, sid: session_id });
+var ghash = wrapConstructorWithKey((key, expectedLength) => new GHASH(key, expectedLength));
+var polyval = wrapConstructorWithKey((key, expectedLength) => new Polyval(key, expectedLength));
+
+// node_modules/@noble/ciphers/esm/aes.js
+var BLOCK_SIZE2 = 16;
+var BLOCK_SIZE32 = 4;
+var EMPTY_BLOCK = /* @__PURE__ */ new Uint8Array(BLOCK_SIZE2);
+var POLY2 = 283;
+function mul22(n) {
+  return n << 1 ^ POLY2 & -(n >> 7);
 }
-function create_sighash_share(session_id, share2, sigvec) {
-  const bind_hash = get_sighash_binder(session_id, share2.idx, sigvec);
-  const hidden_sn = tweak_seckey(share2.hidden_sn, bind_hash);
-  const binder_sn = tweak_seckey(share2.binder_sn, bind_hash);
-  const [sighash] = sigvec;
-  return __spreadProps(__spreadValues({}, share2), { binder_sn, hidden_sn, bind_hash, sighash, sid: session_id });
+function mul(a, b) {
+  let res = 0;
+  for (; b > 0; b >>= 1) {
+    res ^= a & -(b & 1);
+    a = mul22(a);
+  }
+  return res;
 }
-function get_sighash_binder(session_id, member_idx, sighash) {
-  const sid = Buff.bytes(session_id);
-  const idx = Buff.num(member_idx, 4);
-  const msg = Buff.join(sighash);
-  const pre = Buff.join([sid, idx, msg]);
-  return pre.digest.hex;
+var sbox = /* @__PURE__ */ (() => {
+  const t = new Uint8Array(256);
+  for (let i2 = 0, x = 1; i2 < 256; i2++, x ^= mul22(x))
+    t[i2] = x;
+  const box = new Uint8Array(256);
+  box[0] = 99;
+  for (let i2 = 0; i2 < 255; i2++) {
+    let x = t[255 - i2];
+    x |= x << 8;
+    box[t[i2]] = (x ^ x >> 4 ^ x >> 5 ^ x >> 6 ^ x >> 7 ^ 99) & 255;
+  }
+  clean2(t);
+  return box;
+})();
+var rotr32_8 = (n) => n << 24 | n >>> 8;
+var rotl32_8 = (n) => n << 8 | n >>> 24;
+function genTtable(sbox3, fn) {
+  if (sbox3.length !== 256)
+    throw new Error("Wrong sbox length");
+  const T0 = new Uint32Array(256).map((_, j) => fn(sbox3[j]));
+  const T1 = T0.map(rotl32_8);
+  const T2 = T1.map(rotl32_8);
+  const T3 = T2.map(rotl32_8);
+  const T01 = new Uint32Array(256 * 256);
+  const T23 = new Uint32Array(256 * 256);
+  const sbox22 = new Uint16Array(256 * 256);
+  for (let i2 = 0; i2 < 256; i2++) {
+    for (let j = 0; j < 256; j++) {
+      const idx = i2 * 256 + j;
+      T01[idx] = T0[i2] ^ T1[j];
+      T23[idx] = T2[i2] ^ T3[j];
+      sbox22[idx] = sbox3[i2] << 8 | sbox3[j];
+    }
+  }
+  return { sbox: sbox3, sbox2: sbox22, T0, T1, T2, T3, T01, T23 };
+}
+var tableEncoding = /* @__PURE__ */ genTtable(sbox, (s) => mul(s, 3) << 24 | s << 16 | s << 8 | mul(s, 2));
+var xPowers = /* @__PURE__ */ (() => {
+  const p = new Uint8Array(16);
+  for (let i2 = 0, x = 1; i2 < 16; i2++, x = mul22(x))
+    p[i2] = x;
+  return p;
+})();
+function expandKeyLE(key) {
+  abytes4(key);
+  const len = key.length;
+  if (![16, 24, 32].includes(len))
+    throw new Error("aes: invalid key size, should be 16, 24 or 32, got " + len);
+  const { sbox2: sbox22 } = tableEncoding;
+  const toClean = [];
+  if (!isAligned32(key))
+    toClean.push(key = copyBytes(key));
+  const k32 = u32(key);
+  const Nk = k32.length;
+  const subByte = (n) => applySbox(sbox22, n, n, n, n);
+  const xk = new Uint32Array(len + 28);
+  xk.set(k32);
+  for (let i2 = Nk; i2 < xk.length; i2++) {
+    let t = xk[i2 - 1];
+    if (i2 % Nk === 0)
+      t = subByte(rotr32_8(t)) ^ xPowers[i2 / Nk - 1];
+    else if (Nk > 6 && i2 % Nk === 4)
+      t = subByte(t);
+    xk[i2] = xk[i2 - Nk] ^ t;
+  }
+  clean2(...toClean);
+  return xk;
+}
+function apply0123(T01, T23, s0, s1, s2, s3) {
+  return T01[s0 << 8 & 65280 | s1 >>> 8 & 255] ^ T23[s2 >>> 8 & 65280 | s3 >>> 24 & 255];
+}
+function applySbox(sbox22, s0, s1, s2, s3) {
+  return sbox22[s0 & 255 | s1 & 65280] | sbox22[s2 >>> 16 & 255 | s3 >>> 16 & 65280] << 16;
+}
+function encrypt(xk, s0, s1, s2, s3) {
+  const { sbox2: sbox22, T01, T23 } = tableEncoding;
+  let k = 0;
+  s0 ^= xk[k++], s1 ^= xk[k++], s2 ^= xk[k++], s3 ^= xk[k++];
+  const rounds = xk.length / 4 - 2;
+  for (let i2 = 0; i2 < rounds; i2++) {
+    const t02 = xk[k++] ^ apply0123(T01, T23, s0, s1, s2, s3);
+    const t12 = xk[k++] ^ apply0123(T01, T23, s1, s2, s3, s0);
+    const t22 = xk[k++] ^ apply0123(T01, T23, s2, s3, s0, s1);
+    const t32 = xk[k++] ^ apply0123(T01, T23, s3, s0, s1, s2);
+    s0 = t02, s1 = t12, s2 = t22, s3 = t32;
+  }
+  const t0 = xk[k++] ^ applySbox(sbox22, s0, s1, s2, s3);
+  const t1 = xk[k++] ^ applySbox(sbox22, s1, s2, s3, s0);
+  const t2 = xk[k++] ^ applySbox(sbox22, s2, s3, s0, s1);
+  const t3 = xk[k++] ^ applySbox(sbox22, s3, s0, s1, s2);
+  return { s0: t0, s1: t1, s2: t2, s3: t3 };
+}
+function ctr32(xk, isLE5, nonce, src, dst) {
+  abytes4(nonce, BLOCK_SIZE2);
+  abytes4(src);
+  dst = getOutput(src.length, dst);
+  const ctr3 = nonce;
+  const c32 = u32(ctr3);
+  const view = createView2(ctr3);
+  const src32 = u32(src);
+  const dst32 = u32(dst);
+  const ctrPos = isLE5 ? 0 : 12;
+  const srcLen = src.length;
+  let ctrNum = view.getUint32(ctrPos, isLE5);
+  let { s0, s1, s2, s3 } = encrypt(xk, c32[0], c32[1], c32[2], c32[3]);
+  for (let i2 = 0; i2 + 4 <= src32.length; i2 += 4) {
+    dst32[i2 + 0] = src32[i2 + 0] ^ s0;
+    dst32[i2 + 1] = src32[i2 + 1] ^ s1;
+    dst32[i2 + 2] = src32[i2 + 2] ^ s2;
+    dst32[i2 + 3] = src32[i2 + 3] ^ s3;
+    ctrNum = ctrNum + 1 >>> 0;
+    view.setUint32(ctrPos, ctrNum, isLE5);
+    ({ s0, s1, s2, s3 } = encrypt(xk, c32[0], c32[1], c32[2], c32[3]));
+  }
+  const start = BLOCK_SIZE2 * Math.floor(src32.length / BLOCK_SIZE32);
+  if (start < srcLen) {
+    const b32 = new Uint32Array([s0, s1, s2, s3]);
+    const buf = u8(b32);
+    for (let i2 = start, pos = 0; i2 < srcLen; i2++, pos++)
+      dst[i2] = src[i2] ^ buf[pos];
+    clean2(b32);
+  }
+  return dst;
+}
+function computeTag(fn, isLE5, key, data, AAD) {
+  const aadLength = AAD ? AAD.length : 0;
+  const h = fn.create(key, data.length + aadLength);
+  if (AAD)
+    h.update(AAD);
+  const num4 = u64Lengths(8 * data.length, 8 * aadLength, isLE5);
+  h.update(data);
+  h.update(num4);
+  const res = h.digest();
+  clean2(num4);
+  return res;
+}
+var gcm = /* @__PURE__ */ wrapCipher({ blockSize: 16, nonceLength: 12, tagLength: 16, varSizeNonce: true }, function aesgcm(key, nonce, AAD) {
+  if (nonce.length < 8)
+    throw new Error("aes/gcm: invalid nonce length");
+  const tagLength = 16;
+  function _computeTag(authKey, tagMask, data) {
+    const tag = computeTag(ghash, false, authKey, data, AAD);
+    for (let i2 = 0; i2 < tagMask.length; i2++)
+      tag[i2] ^= tagMask[i2];
+    return tag;
+  }
+  function deriveKeys() {
+    const xk = expandKeyLE(key);
+    const authKey = EMPTY_BLOCK.slice();
+    const counter = EMPTY_BLOCK.slice();
+    ctr32(xk, false, counter, counter, authKey);
+    if (nonce.length === 12) {
+      counter.set(nonce);
+    } else {
+      const nonceLen = EMPTY_BLOCK.slice();
+      const view = createView2(nonceLen);
+      setBigUint642(view, 8, BigInt(nonce.length * 8), false);
+      const g = ghash.create(authKey).update(nonce).update(nonceLen);
+      g.digestInto(counter);
+      g.destroy();
+    }
+    const tagMask = ctr32(xk, false, counter, EMPTY_BLOCK);
+    return { xk, authKey, counter, tagMask };
+  }
+  return {
+    encrypt(plaintext) {
+      const { xk, authKey, counter, tagMask } = deriveKeys();
+      const out = new Uint8Array(plaintext.length + tagLength);
+      const toClean = [xk, authKey, counter, tagMask];
+      if (!isAligned32(plaintext))
+        toClean.push(plaintext = copyBytes(plaintext));
+      ctr32(xk, false, counter, plaintext, out.subarray(0, plaintext.length));
+      const tag = _computeTag(authKey, tagMask, out.subarray(0, out.length - tagLength));
+      toClean.push(tag);
+      out.set(tag, plaintext.length);
+      clean2(...toClean);
+      return out;
+    },
+    decrypt(ciphertext) {
+      const { xk, authKey, counter, tagMask } = deriveKeys();
+      const toClean = [xk, authKey, tagMask, counter];
+      if (!isAligned32(ciphertext))
+        toClean.push(ciphertext = copyBytes(ciphertext));
+      const data = ciphertext.subarray(0, -tagLength);
+      const passedTag = ciphertext.subarray(-tagLength);
+      const tag = _computeTag(authKey, tagMask, data);
+      toClean.push(tag);
+      if (!equalBytes(tag, passedTag))
+        throw new Error("aes/gcm: invalid ghash tag");
+      const out = ctr32(xk, false, counter, data);
+      clean2(...toClean);
+      return out;
+    }
+  };
+});
+
+// node_modules/@cmdcode/nostr-p2p/dist/lib/crypto.js
+function get_pubkey(seckey) {
+  const pbytes = schnorr.getPublicKey(seckey);
+  return new Buff(pbytes).hex;
+}
+function get_shared_secret(seckey, peer_pk) {
+  const pubkey2 = peer_pk.length === 66 ? peer_pk : "02" + peer_pk;
+  const sbytes = secp256k1.getSharedSecret(seckey, pubkey2, true);
+  return new Buff(sbytes).slice(1).hex;
+}
+function sign_msg(seckey, message) {
+  const sig = schnorr.sign(message, seckey);
+  return new Buff(sig).hex;
+}
+function verify_sig(message, pubkey2, signature) {
+  return schnorr.verify(signature, message, pubkey2);
+}
+function encrypt_content(secret, content, iv) {
+  const cbytes = Buff.str(content);
+  const sbytes = Buff.hex(secret);
+  const vector = iv !== void 0 ? Buff.hex(iv, 24) : Buff.random(24);
+  const encrypted = gcm(sbytes, vector).encrypt(cbytes);
+  return new Buff(encrypted).b64url + "?iv=" + vector.b64url;
+}
+function decrypt_content(secret, content) {
+  const [encryped, iv] = content.split("?iv=");
+  const cbytes = Buff.b64url(encryped);
+  const sbytes = Buff.hex(secret);
+  const vector = Buff.b64url(iv);
+  const decrypted = gcm(sbytes, vector).decrypt(cbytes);
+  return new Buff(decrypted).str;
+}
+
+// node_modules/@cmdcode/nostr-p2p/dist/lib/util.js
+function gen_message_id() {
+  return Buff.random(16).hex;
+}
+function get_event_id(template3) {
+  const preimg = JSON.stringify([
+    0,
+    template3.pubkey,
+    template3.created_at,
+    template3.kind,
+    template3.tags,
+    template3.content
+  ]);
+  return Buff.str(preimg).digest.hex;
+}
+function get_tags(event, tag) {
+  return event.tags.filter((e) => e.at(0) === tag);
+}
+function is_recipient(event, pubkey2) {
+  const peers = get_tags(event, "p");
+  return peers.some((e) => e[1] === pubkey2);
 }
 
 // node_modules/zod/lib/index.mjs
@@ -32606,7 +32521,7 @@ var z = /* @__PURE__ */ Object.freeze({
   ZodError
 });
 
-// node_modules/@frostr/bifrost/dist/schema/base.js
+// node_modules/@cmdcode/nostr-p2p/dist/schema/base.js
 var big = z.bigint();
 var bool = z.boolean();
 var date = z.date();
@@ -32614,70 +32529,713 @@ var num2 = z.number();
 var uint = z.number().max(Number.MAX_SAFE_INTEGER);
 var str = z.string();
 var stamp = z.number().min(5e8).max(Number.MAX_SAFE_INTEGER);
+var url = z.string().url();
 var any = z.any();
-var sats = z.bigint().max(/* @__PURE__ */ BigInt("100000000") * /* @__PURE__ */ BigInt("21000000"));
-var literal = z.union([
-  z.string(),
-  z.number(),
-  z.boolean(),
-  z.null()
-]);
-var json = z.lazy(() => z.union([literal, z.array(json), z.record(json)]));
 var hex = z.string().regex(/^[0-9a-fA-F]*$/).refine((e) => e.length % 2 === 0);
+var literal = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+var hex16 = hex.refine((e) => e.length === 32);
 var hex20 = hex.refine((e) => e.length === 40);
 var hex32 = hex.refine((e) => e.length === 64);
-var hex33 = hex.refine((e) => e.length === 66);
 var hex64 = hex.refine((e) => e.length === 128);
+var pubkey = hex.refine((e) => e.length === 66);
 var base582 = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]+$/);
 var base642 = z.string().regex(/^[a-zA-Z0-9+/]+={0,2}$/);
-var base64url = z.string().regex(/^[a-zA-Z0-9\-_]+={0,2}$/);
+var b64url = z.string().regex(/^[a-zA-Z0-9\-_]+={0,2}$/);
 var bech322 = z.string().regex(/^[a-z]+1[023456789acdefghjklmnpqrstuvwxyz]+$/);
 var base_default = {
   any,
   base58: base582,
   base64: base642,
-  base64url,
+  b64url,
   bech32: bech322,
   big,
   bool,
   date,
-  hex20,
   hex32,
-  hex33,
+  hex16,
+  hex20,
   hex64,
   hex,
-  json,
   literal,
   num: num2,
-  sats,
+  pubkey,
   str,
   stamp,
-  uint
+  uint,
+  url
+};
+
+// node_modules/@cmdcode/nostr-p2p/dist/schema/event.js
+var tags = base_default.str.array();
+var template = z.object({
+  content: base_default.str,
+  created_at: base_default.stamp,
+  kind: base_default.num,
+  pubkey: base_default.hex32,
+  tags: tags.array()
+});
+var unsigned = template.extend({
+  id: base_default.hex32
+});
+var signed = unsigned.extend({
+  sig: base_default.hex64
+});
+var event_default = { signed, tags, template, unsigned };
+
+// node_modules/@cmdcode/nostr-p2p/dist/schema/msg.js
+var mid = base_default.hex16;
+var payload = base_default.str;
+var topic = base_default.str.min(3).max(256);
+var envelope = z.tuple([topic, mid, payload]);
+var msg_default = { envelope };
+
+// node_modules/@cmdcode/nostr-p2p/dist/schema/index.js
+var schema_default = { base: base_default, event: event_default, msg: msg_default };
+
+// node_modules/@cmdcode/nostr-p2p/dist/util/assert.js
+var Assert;
+(function(Assert3) {
+  function ok2(value, message) {
+    if (value === false)
+      throw new Error(message != null ? message : "Assertion failed!");
+  }
+  Assert3.ok = ok2;
+  function exists5(input, err_msg) {
+    if (typeof input === "undefined") {
+      throw new TypeError(err_msg != null ? err_msg : "Input is undefined!");
+    }
+    if (input === null) {
+      throw new TypeError(err_msg != null ? err_msg : "Input is null!");
+    }
+  }
+  Assert3.exists = exists5;
+  function size2(input, size3, err_msg) {
+    const bytes4 = Buff.bytes(input);
+    if (bytes4.length !== size3) {
+      throw new Error(err_msg != null ? err_msg : "Invalid byte size: ".concat(bytes4.hex, " !== ").concat(size3));
+    }
+    return true;
+  }
+  Assert3.size = size2;
+})(Assert || (Assert = {}));
+
+// node_modules/@cmdcode/nostr-p2p/dist/util/helpers.js
+var now = () => Math.floor(Date.now() / 1e3);
+function parse_error(err) {
+  if (err instanceof Error)
+    return err.message;
+  if (typeof err === "string")
+    return err;
+  return String(err);
+}
+
+// node_modules/@cmdcode/nostr-p2p/dist/lib/event.js
+function create_event(config, payload2, peer_pk, seckey) {
+  var _a;
+  const created_at = (_a = config.created_at) != null ? _a : now();
+  const pubkey2 = get_pubkey(seckey);
+  const secret = get_shared_secret(seckey, peer_pk);
+  const content = encrypt_content(secret, payload2);
+  const event = __spreadProps(__spreadValues({}, config), { pubkey: pubkey2, content, created_at });
+  event.tags.push(["p", peer_pk]);
+  return sign_event(seckey, event);
+}
+function sign_event(seckey, template3) {
+  const id = get_event_id(template3);
+  const sig = sign_msg(seckey, id);
+  return __spreadProps(__spreadValues({}, template3), { id, sig });
+}
+function verify_event(event) {
+  const _a = event, { id, sig } = _a, template3 = __objRest(_a, ["id", "sig"]);
+  const schema = schema_default.event.signed;
+  const parsed = schema.safeParse(event);
+  const vid = get_event_id(template3);
+  if (!parsed.success) {
+    return "event failed schema validation";
+  } else if (id !== vid) {
+    return "event id mismatch";
+  } else if (!verify_sig(id, event.pubkey, sig)) {
+    return "invalid event signature";
+  } else {
+    return null;
+  }
+}
+
+// node_modules/@cmdcode/nostr-p2p/dist/const.js
+var DEBUG = false;
+
+// node_modules/@cmdcode/nostr-p2p/dist/lib/message.js
+function decrypt_payload(event, seckey) {
+  const error = verify_event(event);
+  if (error !== null) {
+    throw new Error(error);
+  }
+  const pubkey2 = get_pubkey(seckey);
+  if (!is_recipient(event, pubkey2)) {
+    throw new Error("pubkey not in peers list");
+  }
+  const secret = get_shared_secret(seckey, event.pubkey);
+  const content = decrypt_content(secret, event.content);
+  const payload2 = JSON.parse(content);
+  return payload2;
+}
+function finalize_message(template3) {
+  var _a;
+  const id = (_a = template3.id) != null ? _a : gen_message_id();
+  return __spreadProps(__spreadValues({}, template3), { id });
+}
+function create_payload(tag, data, id) {
+  try {
+    return JSON.stringify([tag, id, data]);
+  } catch (err) {
+    throw new Error("failed to create message payload");
+  }
+}
+function parse_envelope(envelope2, event) {
+  const schema = schema_default.msg.envelope;
+  const parsed = schema.safeParse(envelope2);
+  if (!parsed.success) {
+    if (DEBUG)
+      console.log(parsed.error);
+    throw new Error("envelope failed schema validation");
+  }
+  const [tag, id, data] = parsed.data;
+  return { env: event, data, id, tag };
+}
+
+// node_modules/@cmdcode/nostr-p2p/dist/lib/validate.js
+function verify_relays(relays) {
+  const schema = schema_default.base.url.array();
+  const parsed = schema.safeParse(relays);
+  if (!parsed.success) {
+    throw new Error("invalid relay set: " + relays);
+  }
+}
+function verify_seckey(seckey) {
+  const schema = schema_default.base.hex32;
+  const parsed = schema.safeParse(seckey);
+  if (!parsed.success) {
+    throw new Error("invalid secret key: " + seckey);
+  } else {
+  }
+}
+
+// node_modules/@cmdcode/frost/dist/ecc/hash.js
+var hash_exports = {};
+__export(hash_exports, {
+  H1: () => H1,
+  H2: () => H2,
+  H3: () => H3,
+  H4: () => H4,
+  H5: () => H5
+});
+
+// node_modules/@cmdcode/frost/dist/const.js
+var _0n7 = BigInt(0);
+var _1n6 = BigInt(1);
+var _P = BigInt("0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f");
+var _N = BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
+var CURVE = secp256k1.CURVE;
+var FIELD = Field(_N, 32, true);
+var POINT = secp256k1.ProjectivePoint;
+var DOMAIN = "FROST-secp256k1-SHA256-v1";
+var const_default = { _0n: _0n7, _1n: _1n6, _N, _P, CURVE, DOMAIN, FIELD, POINT };
+
+// node_modules/@cmdcode/frost/dist/ecc/util.js
+var { POINT: POINT2, _N: _N2, _P: _P2 } = const_default;
+function mod_n(x) {
+  return mod(x, _N2);
+}
+function str_to_bytes(str3) {
+  return new TextEncoder().encode(str3);
+}
+function lift_x2(pubkey2) {
+  let bytes4 = Buff.bytes(pubkey2);
+  if (bytes4.length < 32 || bytes4.length > 33) {
+    throw new Error("invalid pubkeky: " + bytes4.hex + " " + bytes4.length);
+  } else if (bytes4.length === 32) {
+    bytes4 = bytes4.prepend(2);
+  }
+  return POINT2.fromHex(bytes4.hex);
+}
+
+// node_modules/@cmdcode/frost/dist/ecc/hash.js
+var OPT = { m: 1, p: _N, k: 128, expand: "xmd", hash: sha2562 };
+function get_opts(DST) {
+  return __spreadProps(__spreadValues({}, OPT), { DST });
+}
+function H1(msg) {
+  const DST = DOMAIN + "rho";
+  const nums = hash_to_field(msg, 1, get_opts(DST));
+  return Buff.big(nums[0][0], 32);
+}
+function H2(msg) {
+  const DST = DOMAIN + "chal";
+  const nums = hash_to_field(msg, 1, get_opts(DST));
+  return Buff.big(nums[0][0], 32);
+}
+function H3(msg) {
+  const DST = DOMAIN + "nonce";
+  const nums = hash_to_field(msg, 1, get_opts(DST));
+  return Buff.big(nums[0][0], 32);
+}
+function H4(msg) {
+  const DST = str_to_bytes(DOMAIN + "msg");
+  const hash3 = sha2562(new Uint8Array([...DST, ...msg]));
+  return new Buff(hash3);
+}
+function H5(msg) {
+  const DST = str_to_bytes(DOMAIN + "com");
+  const hash3 = sha2562(new Uint8Array([...DST, ...msg]));
+  return new Buff(hash3);
+}
+
+// node_modules/@cmdcode/frost/dist/ecc/group.js
+var group_exports = {};
+__export(group_exports, {
+  DeserializeElement: () => DeserializeElement,
+  DeserializeScalar: () => DeserializeScalar,
+  ElementAdd: () => ElementAdd,
+  ElementAddMany: () => ElementAddMany,
+  Identity: () => Identity,
+  Order: () => Order,
+  RandomScalar: () => RandomScalar,
+  ScalarBaseMulti: () => ScalarBaseMulti,
+  ScalarMulti: () => ScalarMulti,
+  SerializeElement: () => SerializeElement,
+  SerializeScalar: () => SerializeScalar
+});
+
+// node_modules/@cmdcode/frost/dist/util/assert.js
+var assert_exports2 = {};
+__export(assert_exports2, {
+  equal_arr_size: () => equal_arr_size,
+  exists: () => exists,
+  is_equal_set: () => is_equal_set,
+  is_included: () => is_included,
+  is_unique_set: () => is_unique_set,
+  ok: () => ok,
+  size: () => size
+});
+function ok(value, message) {
+  if (value === false)
+    throw new Error(message != null ? message : "Assertion failed!");
+}
+function exists(input) {
+  if (typeof input === "undefined") {
+    throw new TypeError("Input is undefined!");
+  }
+  if (input === null) {
+    throw new TypeError("Input is null!");
+  }
+}
+function size(input, size2) {
+  const bytes4 = Buff.bytes(input);
+  if (bytes4.length !== size2) {
+    throw new Error("Invalid byte size: ".concat(bytes4.hex, " !== ").concat(size2));
+  }
+  return true;
+}
+function is_included(array, item) {
+  if (!array.includes(item)) {
+    throw new Error("item is not included in array");
+  }
+}
+function is_unique_set(array) {
+  for (const x of array) {
+    const c = array.filter((e) => e === x).length;
+    if (c !== 1) {
+      throw new Error("item in set is not unique: " + String(x));
+    }
+  }
+}
+function is_equal_set(array) {
+  if (!array.every((e) => e === array[0])) {
+    throw new Error("set does not have equal items");
+  }
+}
+function equal_arr_size(array_a, array_b) {
+  if (array_a.length !== array_b.length) {
+    throw new Error("array lengths are unequal: ".concat(array_a.length, " !== ").concat(array_b.length));
+  }
+}
+
+// node_modules/@cmdcode/frost/dist/util/helpers.js
+function taghash(tag) {
+  const hash3 = Buff.str(tag).digest;
+  return Buff.join([hash3, hash3]);
+}
+function hash340(tag, ...data) {
+  const hash3 = taghash(tag);
+  const bytes4 = data.map((e) => Buff.bytes(e));
+  return Buff.join([hash3, ...bytes4]).digest;
+}
+
+// node_modules/@cmdcode/frost/dist/ecc/group.js
+var { POINT: POINT3, _0n: _0n8, _1n: _1n7, _N: _N3 } = const_default;
+function Order() {
+  return _N3;
+}
+function Identity() {
+  return new POINT3(_0n8, _1n7, _0n8);
+}
+function RandomScalar() {
+  const bigint = Buff.random(32).big;
+  return mod_n(bigint);
+}
+function ElementAdd(A, B) {
+  if (A === null && B === null) {
+    throw new Error("both points are null!");
+  } else if (A === null) {
+    assert_exports2.exists(B);
+    return B;
+  } else if (B === null) {
+    return A;
+  } else {
+    const C = A.add(B);
+    C.assertValidity();
+    return C;
+  }
+}
+function ElementAddMany(elem) {
+  const sum = elem.slice(1).reduce((p, c) => ElementAdd(p, c), elem[0]);
+  if (sum === null) {
+    throw new Error("Summed point is null.");
+  }
+  sum.assertValidity();
+  return sum;
+}
+function ScalarMulti(A, k) {
+  const pt = A.multiply(k);
+  pt.assertValidity();
+  return pt;
+}
+function ScalarBaseMulti(k) {
+  const base = secp256k1.ProjectivePoint.BASE;
+  const pt = base.multiply(k);
+  pt.assertValidity();
+  return pt;
+}
+function SerializeElement(A) {
+  return Buff.bytes(A.toRawBytes(true));
+}
+function DeserializeElement(bytes4) {
+  const hex4 = Buff.bytes(bytes4).hex;
+  return POINT3.fromHex(hex4);
+}
+function SerializeScalar(scalar) {
+  return new Buff(scalar, 32);
+}
+function DeserializeScalar(bytes4) {
+  return Buff.bytes(bytes4).big;
+}
+
+// node_modules/@cmdcode/frost/dist/lib/helpers.js
+function get_pubkey2(secret) {
+  const scalar = Buff.bytes(secret).big;
+  const point = group_exports.ScalarBaseMulti(scalar);
+  return group_exports.SerializeElement(point).hex;
+}
+function get_challenge(pnonce, pubkey2, message) {
+  const grp_pk = convert_pubkey(pubkey2, "bip340");
+  const grp_pn = convert_pubkey(pnonce, "bip340");
+  assert_exports2.size(grp_pk, 32);
+  assert_exports2.size(grp_pn, 32);
+  const digest = hash340("BIP0340/challenge", grp_pn, grp_pk, message);
+  return digest.big;
+}
+function convert_pubkey(pubkey2, type) {
+  const pub = Buff.bytes(pubkey2);
+  if (type === "ecdsa") {
+    return pub.length === 32 ? pub.prepend(2).hex : pub.hex;
+  } else if (type === "bip340") {
+    return pub.length === 33 ? pub.slice(1).hex : pub.hex;
+  } else {
+    throw new Error("invalid pubkey type");
+  }
+}
+
+// node_modules/@cmdcode/frost/dist/lib/commit.js
+function get_nonce_ids(pnonces) {
+  return pnonces.map((pn) => BigInt(pn.idx));
+}
+function get_commits_prefix(pnonces) {
+  let enc_group_commit = [];
+  const sorted_pnonces = pnonces.sort((a, b) => a.idx - b.idx);
+  for (const { idx, hidden_pn, binder_pn } of sorted_pnonces) {
+    const enc_commit = [group_exports.SerializeScalar(idx), hidden_pn, binder_pn];
+    enc_group_commit = [...enc_group_commit, ...enc_commit];
+  }
+  return Buff.join(enc_group_commit);
+}
+function get_group_prefix(pnonces, group_pk, message) {
+  const msg_bytes = Buff.hex(message);
+  const msg_hash = hash_exports.H4(msg_bytes);
+  const commit_list = get_commits_prefix(pnonces);
+  const commit_hash = hash_exports.H5(commit_list);
+  return Buff.join([group_pk, msg_hash, commit_hash]);
+}
+function get_bind_factor(binders, idx) {
+  for (const bind of binders) {
+    if (idx === bind.idx) {
+      return Buff.bytes(bind.factor).big;
+    }
+  }
+  throw new Error("invalid participant");
+}
+function get_group_binders(nonces, prefix) {
+  return nonces.map(({ idx }) => {
+    const scalar = group_exports.SerializeScalar(idx);
+    const rho_input = Buff.join([prefix, scalar]);
+    return { idx, factor: hash_exports.H1(rho_input).hex };
+  });
+}
+function get_group_pubnonce(pnonces, binders) {
+  let group_commit = null;
+  for (const { idx, binder_pn, hidden_pn } of pnonces) {
+    const hidden_elem = group_exports.DeserializeElement(hidden_pn);
+    const binding_elem = group_exports.DeserializeElement(binder_pn);
+    const bind_factor = get_bind_factor(binders, idx);
+    const factored_elem = group_exports.ScalarMulti(binding_elem, bind_factor);
+    group_commit = group_exports.ElementAdd(group_commit, hidden_elem);
+    group_commit = group_exports.ElementAdd(group_commit, factored_elem);
+  }
+  assert_exports2.exists(group_commit);
+  return group_exports.SerializeElement(group_commit).hex;
+}
+
+// node_modules/@cmdcode/frost/dist/ecc/state.js
+function get_point_state(element, tweaks = []) {
+  const ints = tweaks.map((e) => Buff.bytes(e).big);
+  const pos = _1n6;
+  const neg = _N - pos;
+  let point = element, parity = pos, state = pos, tweak = _0n7;
+  for (const t of ints) {
+    const tG = ScalarBaseMulti(t);
+    parity = point.hasEvenY() ? pos : neg;
+    point = parity === neg ? point.negate() : point;
+    point = ElementAdd(point, tG);
+    point.assertValidity();
+    state = mod_n(parity * state);
+    tweak = mod_n(t + parity * tweak);
+  }
+  parity = point.hasEvenY() ? pos : neg;
+  return { parity, point, state, tweak };
+}
+
+// node_modules/@cmdcode/frost/dist/lib/context.js
+function get_group_key_context(pubkey2, tweaks) {
+  const int_pk = Buff.bytes(pubkey2).hex;
+  const int_pt = lift_x2(int_pk);
+  const group_pt = get_point_state(int_pt, tweaks);
+  const group_pk = group_pt.point.toHex(true);
+  return { int_pk, int_pt, group_pk, group_pt };
+}
+function get_group_commit_context(key_ctx, pnonces, message) {
+  const group_pubkey = key_ctx.group_pk;
+  const bind_prefix = get_group_prefix(pnonces, group_pubkey, message).hex;
+  const bind_factors = get_group_binders(pnonces, bind_prefix);
+  const group_pn = get_group_pubnonce(pnonces, bind_factors);
+  const indexes = get_nonce_ids(pnonces);
+  const challenge3 = get_challenge(group_pn, group_pubkey, message);
+  message = Buff.bytes(message).hex;
+  return { bind_prefix, bind_factors, challenge: challenge3, pnonces, group_pn, indexes, message };
+}
+function get_group_signing_ctx(group_pk, pnonces, message, tweaks) {
+  const key_ctx = get_group_key_context(group_pk, tweaks);
+  const com_ctx = get_group_commit_context(key_ctx, pnonces, message);
+  return __spreadValues(__spreadValues({}, key_ctx), com_ctx);
+}
+
+// node_modules/@cmdcode/frost/dist/lib/poly.js
+function interpolate_x(L, x) {
+  assert_exports2.is_included(L, x);
+  assert_exports2.is_unique_set(L);
+  let numerator = _1n6, denominator = _1n6;
+  for (const x_j of L) {
+    if (x_j === x)
+      continue;
+    numerator = mod_n(FIELD.mul(numerator, x_j));
+    denominator = mod_n(FIELD.mul(denominator, x_j - x));
+  }
+  return mod_n(FIELD.div(numerator, denominator));
+}
+function calc_lagrange_coeff(L, P, x) {
+  assert_exports2.is_unique_set(L);
+  let numerator = _1n6, denominator = _1n6;
+  for (const x_j of L) {
+    if (x_j === P)
+      continue;
+    numerator = mod_n(FIELD.mul(numerator, x - x_j));
+    denominator = mod_n(FIELD.mul(denominator, P - x_j));
+  }
+  return mod_n(FIELD.div(numerator, denominator));
+}
+
+// node_modules/@cmdcode/frost/dist/lib/ecdh.js
+function create_ecdh_share(members, share2, pubkey2) {
+  const mbrs = members.filter((idx2) => idx2 !== share2.idx).map((i2) => BigInt(i2));
+  const idx = BigInt(share2.idx);
+  const secret = Buff.hex(share2.seckey).big;
+  const point = lift_x2(pubkey2);
+  const L_coeff = calc_lagrange_coeff(mbrs, idx, _0n7);
+  const P_coeff = mod_n(L_coeff * secret);
+  const ecdh_pt = point.multiply(P_coeff);
+  const ecdh_pk = group_exports.SerializeElement(ecdh_pt).hex;
+  return { idx: share2.idx, pubkey: ecdh_pk };
+}
+function derive_ecdh_secret(shares) {
+  let point = null;
+  for (const share2 of shares) {
+    if (point === null) {
+      point = lift_x2(share2.pubkey);
+    } else {
+      const pt = lift_x2(share2.pubkey);
+      point = point.add(pt);
+    }
+  }
+  assert_exports2.exists(point);
+  return group_exports.SerializeElement(point).hex;
+}
+
+// node_modules/@cmdcode/frost/dist/lib/sign.js
+function sign_msg2(ctx, share2, snonce) {
+  const { bind_factors, challenge: challenge3, indexes, group_pt: Q } = ctx;
+  const bind_factor = get_bind_factor(bind_factors, share2.idx);
+  const coefficient = interpolate_x(indexes, BigInt(share2.idx));
+  if (snonce.idx !== share2.idx) {
+    throw new Error("commit index does not match share index: ".concat(snonce.idx, " !== ").concat(share2.idx));
+  }
+  let snonce_h = Buff.bytes(snonce.hidden_sn).big, snonce_b = Buff.bytes(snonce.binder_sn).big, seckey = Buff.bytes(share2.seckey).big;
+  const R_elem = lift_x2(ctx.group_pn);
+  if (!R_elem.hasEvenY()) {
+    snonce_h = CURVE.n - snonce_h;
+    snonce_b = CURVE.n - snonce_b;
+  }
+  const sk = mod_n(Q.parity * Q.state * seckey);
+  const nk = mod_n(snonce_h + snonce_b * bind_factor);
+  const ps = mod_n(challenge3 * coefficient * sk + nk);
+  return {
+    idx: share2.idx,
+    psig: Buff.big(ps, 32).hex,
+    pubkey: get_pubkey2(share2.seckey)
+  };
+}
+function combine_partial_sigs(context, psigs) {
+  const { challenge: challenge3, pnonces, group_pt: Q, group_pk, message } = context;
+  const commit_prefix = get_group_prefix(pnonces, group_pk, message);
+  const group_binders = get_group_binders(pnonces, commit_prefix);
+  const group_pnonce = get_group_pubnonce(pnonces, group_binders);
+  const ps = psigs.map((e) => Buff.hex(e.psig).big).reduce((acc, nxt) => mod_n(acc + nxt), _0n7);
+  const twk = mod_n(challenge3 * Q.parity * Q.tweak);
+  const s = mod_n(ps + twk);
+  return Buff.join([group_pnonce.slice(2), Buff.big(s, 32)]).hex;
+}
+function verify_partial_sig(ctx, pnonce, share_pk, share_psig) {
+  const { bind_factors, challenge: challenge3, indexes, group_pn, group_pt: Q } = ctx;
+  const binder = get_bind_factor(bind_factors, pnonce.idx);
+  let hidden_elem = lift_x2(pnonce.hidden_pn), binder_elem = lift_x2(pnonce.binder_pn), public_elem = lift_x2(share_pk);
+  const R_elem = lift_x2(group_pn);
+  if (!R_elem.hasEvenY()) {
+    hidden_elem = group_exports.ScalarMulti(hidden_elem, CURVE.n - _1n6);
+    binder_elem = group_exports.ScalarMulti(binder_elem, CURVE.n - _1n6);
+  }
+  const commit_elem = group_exports.ScalarMulti(binder_elem, binder);
+  const nonce_elem = group_exports.ElementAdd(hidden_elem, commit_elem);
+  const lambda_i = interpolate_x(indexes, BigInt(pnonce.idx));
+  const state = mod_n(Q.parity * Q.state);
+  const chal = mod_n(challenge3 * lambda_i * state);
+  const sig = Buff.hex(share_psig).big;
+  const sG = group_exports.ScalarBaseMulti(sig);
+  const pki = group_exports.ScalarMulti(public_elem, chal);
+  const R = group_exports.ElementAdd(nonce_elem, pki);
+  return sG.x === R.x;
+}
+
+// node_modules/@frostr/bifrost/dist/lib/ecdh.js
+function create_ecdh_pkg(members, ecdh_pk, secshare) {
+  const ecdh_share = create_ecdh_share(members, secshare, ecdh_pk);
+  return { idx: ecdh_share.idx, keyshare: ecdh_share.pubkey, members, ecdh_pk };
+}
+function combine_ecdh_pkgs(pkgs) {
+  const keyshares = pkgs.map((e) => {
+    return { idx: e.idx, pubkey: e.keyshare };
+  });
+  return derive_ecdh_secret(keyshares);
+}
+
+// node_modules/@frostr/bifrost/dist/schema/base.js
+var big2 = z.bigint();
+var bool2 = z.boolean();
+var date2 = z.date();
+var num3 = z.number();
+var uint2 = z.number().max(Number.MAX_SAFE_INTEGER);
+var str2 = z.string();
+var stamp2 = z.number().min(5e8).max(Number.MAX_SAFE_INTEGER);
+var any2 = z.any();
+var sats = z.bigint().max(/* @__PURE__ */ BigInt("100000000") * /* @__PURE__ */ BigInt("21000000"));
+var literal2 = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null()
+]);
+var json = z.lazy(() => z.union([literal2, z.array(json), z.record(json)]));
+var hex2 = z.string().regex(/^[0-9a-fA-F]*$/).refine((e) => e.length % 2 === 0);
+var hex202 = hex2.refine((e) => e.length === 40);
+var hex322 = hex2.refine((e) => e.length === 64);
+var hex33 = hex2.refine((e) => e.length === 66);
+var hex642 = hex2.refine((e) => e.length === 128);
+var base583 = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]+$/);
+var base643 = z.string().regex(/^[a-zA-Z0-9+/]+={0,2}$/);
+var base64url = z.string().regex(/^[a-zA-Z0-9\-_]+={0,2}$/);
+var bech323 = z.string().regex(/^[a-z]+1[023456789acdefghjklmnpqrstuvwxyz]+$/);
+var base_default2 = {
+  any: any2,
+  base58: base583,
+  base64: base643,
+  base64url,
+  bech32: bech323,
+  big: big2,
+  bool: bool2,
+  date: date2,
+  hex20: hex202,
+  hex32: hex322,
+  hex33,
+  hex64: hex642,
+  hex: hex2,
+  json,
+  literal: literal2,
+  num: num3,
+  sats,
+  str: str2,
+  stamp: stamp2,
+  uint: uint2
 };
 
 // node_modules/@frostr/bifrost/dist/schema/pkg.js
 var commit = z.object({
-  idx: base_default.num,
-  pubkey: base_default.hex33,
-  hidden_pn: base_default.hex33,
-  binder_pn: base_default.hex33
+  idx: base_default2.num,
+  pubkey: base_default2.hex33,
+  hidden_pn: base_default2.hex33,
+  binder_pn: base_default2.hex33
 });
 var group = z.object({
   commits: z.array(commit),
-  group_pk: base_default.hex33,
-  threshold: base_default.num
+  group_pk: base_default2.hex33,
+  threshold: base_default2.num
 });
 var share = z.object({
-  idx: base_default.num,
-  binder_sn: base_default.hex32,
-  hidden_sn: base_default.hex32,
-  seckey: base_default.hex32
+  idx: base_default2.num,
+  binder_sn: base_default2.hex32,
+  hidden_sn: base_default2.hex32,
+  seckey: base_default2.hex32
 });
 var ecdh = z.object({
-  idx: base_default.num,
-  keyshare: base_default.hex,
-  members: base_default.num.array(),
-  ecdh_pk: base_default.hex
+  idx: base_default2.num,
+  keyshare: base_default2.hex,
+  members: base_default2.num.array(),
+  ecdh_pk: base_default2.hex
 });
 var pkg_default = {
   commit,
@@ -32688,50 +33246,474 @@ var pkg_default = {
 
 // node_modules/@frostr/bifrost/dist/schema/sign.js
 var commit2 = pkg_default.commit.extend({
-  bind_hash: base_default.hex32,
-  sid: base_default.hex32,
-  sighash: base_default.hex32
+  bind_hash: base_default2.hex32,
+  sid: base_default2.hex32,
+  sighash: base_default2.hex32
 });
 var member = pkg_default.share.extend({
-  bind_hash: base_default.hex32,
-  sid: base_default.hex32,
-  sighash: base_default.hex32
+  bind_hash: base_default2.hex32,
+  sid: base_default2.hex32,
+  sighash: base_default2.hex32
 });
-var psig_entry = z.tuple([base_default.hex32, base_default.hex32]);
-var sighash_vec = z.tuple([base_default.hex32]).rest(base_default.hex32);
-var template = z.object({
-  content: base_default.str.nullable(),
+var psig_entry = z.tuple([base_default2.hex32, base_default2.hex32]);
+var sighash_vec = z.tuple([base_default2.hex32]).rest(base_default2.hex32);
+var template2 = z.object({
+  content: base_default2.str.nullable(),
   hashes: sighash_vec.array(),
-  members: base_default.num.array(),
-  stamp: base_default.num,
-  type: base_default.str
+  members: base_default2.num.array(),
+  stamp: base_default2.num,
+  type: base_default2.str
 });
-var session = template.extend({
-  gid: base_default.hex32,
-  sid: base_default.hex32
+var session = template2.extend({
+  gid: base_default2.hex32,
+  sid: base_default2.hex32
 });
 var psig_pkg = z.object({
-  idx: base_default.num,
+  idx: base_default2.num,
   psigs: psig_entry.array(),
-  pubkey: base_default.hex33,
-  sid: base_default.hex32
+  pubkey: base_default2.hex33,
+  sid: base_default2.hex32
 });
-var sign_default = { commit: commit2, member, psig_entry, psig_pkg, session, sighash_vec, template };
+var sign_default = { commit: commit2, member, psig_entry, psig_pkg, session, sighash_vec, template: template2 };
 
 // node_modules/@frostr/bifrost/dist/schema/index.js
-var schema_default = { base: base_default, pkg: pkg_default, sign: sign_default };
+var schema_default2 = { base: base_default2, pkg: pkg_default, sign: sign_default };
+
+// node_modules/@frostr/bifrost/dist/lib/parse.js
+function parse_ecdh_message(msg) {
+  try {
+    const schema = schema_default2.pkg.ecdh;
+    const json2 = JSON.parse(msg.data);
+    const parsed = schema.parse(json2);
+    return __spreadProps(__spreadValues({}, msg), { data: parsed });
+  } catch (e) {
+    throw new Error("ecdh message failed validation");
+  }
+}
+function parse_session_message(msg) {
+  try {
+    const schema = schema_default2.sign.session;
+    const json2 = JSON.parse(msg.data);
+    const parsed = schema.parse(json2);
+    return __spreadProps(__spreadValues({}, msg), { data: parsed });
+  } catch (e) {
+    throw new Error("session message failed validation");
+  }
+}
+function parse_psig_message(msg) {
+  try {
+    const schema = schema_default2.sign.psig_pkg;
+    const json2 = JSON.parse(msg.data);
+    const parsed = schema.parse(json2);
+    return __spreadProps(__spreadValues({}, msg), { data: parsed });
+  } catch (err) {
+    throw new Error("signature message failed validation");
+  }
+}
+function parse_group_pkg(group_pkg) {
+  try {
+    const schema = schema_default2.pkg.group;
+    return schema.parse(group_pkg);
+  } catch (err) {
+    console.log("error:", err);
+    throw new Error("group package failed validation");
+  }
+}
+function parse_share_pkg(share_pkg) {
+  try {
+    const schema = schema_default2.pkg.share;
+    return schema.parse(share_pkg);
+  } catch (err) {
+    console.log("error:", err);
+    throw new Error("share package failed validation");
+  }
+}
+
+// node_modules/@frostr/bifrost/dist/util/helpers.js
+var now2 = () => Math.floor(Date.now() / 1e3);
+function copy_obj(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+function normalize_obj(obj) {
+  if (obj instanceof Map || Array.isArray(obj) || typeof obj !== "object") {
+    return obj;
+  } else {
+    return Object.keys(obj).sort().filter(([_, value]) => value !== void 0).reduce((sorted, key) => {
+      sorted[key] = obj[key];
+      return sorted;
+    }, {});
+  }
+}
+function parse_error2(err) {
+  if (err instanceof Error)
+    return err.message;
+  if (typeof err === "string")
+    return err;
+  return String(err);
+}
+function validate_schema(obj, schema, err_msg) {
+  const parsed = schema.safeParse(obj);
+  if (parsed.success)
+    return true;
+  if (err_msg === void 0)
+    return false;
+  throw new Error(err_msg != null ? err_msg : "object failed schema validation");
+}
+
+// node_modules/@frostr/bifrost/dist/util/assert.js
+var Assert2;
+(function(Assert3) {
+  function ok2(value, message) {
+    if (value === false)
+      throw new Error(message != null ? message : "Assertion failed!");
+  }
+  Assert3.ok = ok2;
+  function equal(actual, expected, err_msg) {
+    if (actual !== expected)
+      throw new Error(err_msg != null ? err_msg : "".concat(actual, " !== ").concat(expected));
+  }
+  Assert3.equal = equal;
+  function exists5(input, err_msg) {
+    if (typeof input === "undefined") {
+      throw new TypeError(err_msg != null ? err_msg : "Input is undefined!");
+    }
+    if (input === null) {
+      throw new TypeError(err_msg != null ? err_msg : "Input is null!");
+    }
+  }
+  Assert3.exists = exists5;
+  function size2(input, size3, err_msg) {
+    const bytes4 = Buff.bytes(input);
+    if (bytes4.length !== size3) {
+      throw new Error(err_msg != null ? err_msg : "Invalid byte size: ".concat(bytes4.hex, " !== ").concat(size3));
+    }
+    return true;
+  }
+  Assert3.size = size2;
+  function schema(schema2, input, err_msg) {
+    exists5(input);
+    validate_schema(input, schema2, err_msg != null ? err_msg : null);
+  }
+  Assert3.schema = schema;
+  function is_hex3(input) {
+    if (typeof input !== "string" || input.match(/[^a-fA-F0-9]/) !== null || input.length % 2 !== 0) {
+      throw new Error("invalid hex:" + input);
+    }
+  }
+  Assert3.is_hex = is_hex3;
+})(Assert2 || (Assert2 = {}));
+
+// node_modules/@frostr/bifrost/dist/util/crypto.js
+var _N4 = secp256k1.CURVE.n;
+var FD = Field(_N4, 32, true);
+var GP = secp256k1.ProjectivePoint.BASE;
+function get_seckey(secret, even_y = false) {
+  let sk = serialize_bytes(secret).big % _N4;
+  if (even_y) {
+    const pt = GP.multiply(sk);
+    return pt.hasEvenY() ? Buff.big(sk).hex : Buff.big(_N4 - sk).hex;
+  } else {
+    return Buff.big(sk).hex;
+  }
+}
+function get_pubkey3(seckey, format) {
+  const sk = serialize_bytes(seckey).big;
+  const pt = GP.multiply(sk);
+  const pk = pt.toHex(true);
+  return convert_pubkey2(pk, format);
+}
+function tweak_seckey(seckey, tweak, even_y = false) {
+  const sk = serialize_bytes(seckey).big;
+  const twk = serialize_bytes(tweak).big;
+  const tweaked_sk = FD.add(sk, twk);
+  const new_secret = Buff.big(tweaked_sk);
+  return get_seckey(new_secret, even_y);
+}
+function tweak_pubkey(pubkey2, tweak, even_y = false) {
+  const format = get_pubkey_format(pubkey2);
+  const twk_big = serialize_bytes(tweak).big;
+  const pub_pt = lift_pubkey(pubkey2);
+  const tweak_pt = GP.multiply(twk_big);
+  let tweaked_pt = pub_pt.add(tweak_pt);
+  if (even_y && !tweaked_pt.hasEvenY()) {
+    tweaked_pt = tweaked_pt.negate();
+  }
+  const pk = tweaked_pt.toHex(true);
+  return convert_pubkey2(pk, format);
+}
+function lift_pubkey(pubkey2) {
+  try {
+    const pk = convert_pubkey2(pubkey2, "ecdsa");
+    return secp256k1.ProjectivePoint.fromHex(pk);
+  } catch (err) {
+    throw new Error("invalid pubkey: " + pubkey2);
+  }
+}
+function serialize_pubkey(pubkey2, format) {
+  try {
+    const pk = serialize_bytes(pubkey2);
+    if (pk.length === 33 && format === "bip340") {
+      return pk.slice(1);
+    } else if (pk.length === 32 && format === "ecdsa") {
+      return pk.prepend(2);
+    } else {
+      return pk;
+    }
+  } catch (err) {
+    throw new Error("invalid pubkey: " + String(pubkey2));
+  }
+}
+function convert_pubkey2(pubkey2, format) {
+  const pk = serialize_pubkey(pubkey2, format);
+  return pk.hex;
+}
+function get_pubkey_format(pubkey2) {
+  const pk = serialize_bytes(pubkey2);
+  if (pk.length === 33)
+    return "ecdsa";
+  if (pk.length === 32)
+    return "bip340";
+  throw new Error("invalid pubkey: " + String(pubkey2));
+}
+function serialize_bytes(bytes4) {
+  try {
+    return Buff.bytes(bytes4);
+  } catch (err) {
+    throw new Error("invalid bytes: " + String(bytes4));
+  }
+}
+
+// node_modules/@frostr/bifrost/dist/util/parse.js
+var Parse;
+(function(Parse2) {
+  function error(err) {
+    if (err instanceof Error)
+      return err.message;
+    if (typeof err === "string")
+      return err;
+    return String(err);
+  }
+  Parse2.error = error;
+  function data(data2, schema) {
+    return schema.safeParse(data2);
+  }
+  Parse2.data = data;
+  function array(data2, schema) {
+    const parsed = data2.map((e) => schema.safeParse(e));
+    const errors = parsed.filter((e) => !e.success).map((e) => e.error.errors.map((x) => "".concat(x.message, ": ").concat(x.path)));
+    return errors.length !== 0 ? { ok: false, errors } : { ok: true, data: parsed.map((e) => e.data) };
+  }
+  Parse2.array = array;
+})(Parse || (Parse = {}));
+
+// node_modules/@frostr/bifrost/dist/lib/util.js
+function select_random_peers(peers, thold) {
+  const rnd = () => Math.random() > 0.5 ? 1 : -1;
+  const idx = Math.min(peers.length, thold - 1);
+  return peers.sort(rnd).slice(0, idx);
+}
+function get_member_indexes(group2, pubkeys) {
+  const indexes = group2.commits.filter((e) => pubkeys.includes(convert_pubkey2(e.pubkey, "bip340"))).map((e) => e.idx);
+  Assert2.ok(indexes.length === pubkeys.length, "index count does not match pubkey count");
+  return indexes;
+}
+
+// node_modules/@frostr/bifrost/dist/api/ecdh.js
+async function ecdh_handler_api(node, msg) {
+  const middleware = node.config.middleware.ecdh;
+  try {
+    node.emit("/ecdh/handler/req", copy_obj(msg));
+    if (typeof middleware === "function") {
+      msg = middleware(node, msg);
+    }
+    const { members, ecdh_pk } = msg.data;
+    const pkg = node.signer.gen_ecdh_share(members, ecdh_pk);
+    const envelope2 = finalize_message({
+      data: JSON.stringify(pkg),
+      id: msg.id,
+      tag: "/ecdh/res"
+    });
+    const res = await node.client.publish(envelope2, msg.env.pubkey);
+    if (!res.ok)
+      throw new Error("failed to publish response");
+    node.emit("/ecdh/handler/res", copy_obj(res.data));
+  } catch (err) {
+    if (node.debug)
+      console.log(err);
+    node.emit("/ecdh/handler/rej", [parse_error2(err), copy_obj(msg)]);
+  }
+}
+function ecdh_request_api(node) {
+  return async (ecdh_pk, peers) => {
+    const thold = node.group.threshold;
+    const selected = select_random_peers(peers != null ? peers : peers = node.peers.send, thold);
+    const encrypted = node.cache.ecdh.get(ecdh_pk);
+    if (encrypted !== void 0) {
+      return { ok: true, data: node.signer.unwrap(encrypted, ecdh_pk) };
+    }
+    const members = get_member_indexes(node.group, [node.pubkey, ...selected]);
+    const self_pkg = node.signer.gen_ecdh_share(members, ecdh_pk);
+    let msgs = null;
+    try {
+      msgs = await create_ecdh_request(node, selected, self_pkg);
+      node.emit("/ecdh/sender/res", copy_obj(msgs));
+    } catch (err) {
+      if (node.debug)
+        console.log(err);
+      const reason = parse_error2(err);
+      node.emit("/ecdh/sender/rej", [reason, copy_obj(self_pkg)]);
+      return { ok: false, err: reason };
+    }
+    try {
+      Assert2.ok(msgs !== null, "no responses from peers");
+      const pkgs = [self_pkg, ...msgs.map((e) => e.data)];
+      const secret = finalize_ecdh_response(pkgs);
+      const content = node.signer.wrap(secret, ecdh_pk);
+      node.cache.ecdh.set(ecdh_pk, content);
+      node.emit("/ecdh/sender/ret", [ecdh_pk, secret]);
+      return { ok: true, data: secret };
+    } catch (err) {
+      if (node.debug)
+        console.log(err);
+      const reason = parse_error2(err);
+      node.emit("/ecdh/sender/err", [reason, copy_obj(msgs != null ? msgs : [])]);
+      return { ok: false, err: reason };
+    }
+  };
+}
+async function create_ecdh_request(node, peers, pkg) {
+  const msg = { data: JSON.stringify(pkg), tag: "/ecdh/req" };
+  const res = await node.client.multicast(msg, peers);
+  if (!res.sub.ok)
+    throw new Error(res.sub.reason);
+  return res.sub.inbox.map((e) => {
+    const parsed = parse_ecdh_message(e);
+    Assert2.ok(parsed !== null, "invalid ecdh response from pubkey: " + e.env.pubkey);
+    return parsed;
+  });
+}
+function finalize_ecdh_response(pkgs) {
+  return combine_ecdh_pkgs(pkgs);
+}
+
+// node_modules/@frostr/bifrost/dist/api/ping.js
+async function ping_handler_api(node, msg) {
+  try {
+    copy_obj;
+    node.emit("/ping/handler/req", msg);
+    const envelope2 = finalize_message({
+      data: "pong",
+      id: msg.id,
+      tag: "/ping/res"
+    });
+    const res = await node.client.publish(envelope2, msg.env.pubkey);
+    if (!res.ok)
+      throw new Error("failed to publish response");
+    node.emit("/ping/handler/res", copy_obj(res.data));
+  } catch (err) {
+    if (node.debug)
+      console.log(err);
+    node.emit("/ping/handler/rej", [parse_error2(err), copy_obj(msg)]);
+  }
+}
+function ping_request_api(node) {
+  return async () => {
+    let msgs = null;
+    try {
+      msgs = await create_ping_request(node);
+      node.emit("/ping/sender/res", copy_obj(msgs));
+    } catch (err) {
+      if (node.debug)
+        console.log(err);
+      const reason = parse_error2(err);
+      node.emit("/ping/sender/rej", [reason, copy_obj(msgs != null ? msgs : [])]);
+      return { ok: false, err: reason };
+    }
+    try {
+      Assert2.ok(msgs !== null, "no responses from peers");
+      const pubkeys = msgs.map((e) => e.env.pubkey);
+      node.emit("/ping/sender/ret", pubkeys);
+      return { ok: true, data: pubkeys };
+    } catch (err) {
+      if (node.debug)
+        console.log(err);
+      const reason = parse_error2(err);
+      node.emit("/ping/sender/err", [reason, copy_obj(msgs != null ? msgs : [])]);
+      return { ok: false, err: reason };
+    }
+  };
+}
+async function create_ping_request(node) {
+  const msg = { data: "ping", tag: "/ping/req" };
+  const res = await node.client.multicast(msg, node.peers.all);
+  if (!res.sub.ok)
+    throw new Error(res.sub.reason);
+  res.sub.inbox.map((e) => {
+    Assert2.ok(e.data === "pong", "invalid ping response from pubkey: " + e.env.pubkey);
+  });
+  return res.sub.inbox;
+}
+
+// node_modules/@frostr/bifrost/dist/lib/sighash.js
+function format_sigvector(message) {
+  if (Array.isArray(message)) {
+    return message;
+  } else if (typeof message === "string") {
+    return [message];
+  } else {
+    throw new Error("invalid message payload");
+  }
+}
+function create_sighash_commit(session_id, commit3, sigvec) {
+  const bind_hash = get_sighash_binder(session_id, commit3.idx, sigvec);
+  const hidden_pn = tweak_pubkey(commit3.hidden_pn, bind_hash);
+  const binder_pn = tweak_pubkey(commit3.binder_pn, bind_hash);
+  const [sighash] = sigvec;
+  return __spreadProps(__spreadValues({}, commit3), { binder_pn, hidden_pn, bind_hash, sighash, sid: session_id });
+}
+function create_sighash_share(session_id, share2, sigvec) {
+  const bind_hash = get_sighash_binder(session_id, share2.idx, sigvec);
+  const hidden_sn = tweak_seckey(share2.hidden_sn, bind_hash);
+  const binder_sn = tweak_seckey(share2.binder_sn, bind_hash);
+  const [sighash] = sigvec;
+  return __spreadProps(__spreadValues({}, share2), { binder_sn, hidden_sn, bind_hash, sighash, sid: session_id });
+}
+function get_sighash_binder(session_id, member_idx, sighash) {
+  const sid = Buff.bytes(session_id);
+  const idx = Buff.num(member_idx, 4);
+  const msg = Buff.join(sighash);
+  const pre = Buff.join([sid, idx, msg]);
+  return pre.digest.hex;
+}
+
+// node_modules/@frostr/bifrost/dist/lib/group.js
+function get_group_id(group2) {
+  const prefix = get_commits_prefix(group2.commits);
+  const preimg = Buff.join([prefix, group2.group_pk]);
+  return preimg.digest.hex;
+}
+function get_commit_by_idx(commits, idx) {
+  const commit3 = commits.find((e) => e.idx === idx);
+  Assert2.exists(commit3, "commit package not found for idx: " + idx);
+  return commit3;
+}
+function is_group_member(group2, share2) {
+  const idx = share2.idx;
+  const pubkey2 = get_pubkey3(share2.seckey, "ecdsa");
+  return group2.commits.some((e) => e.idx === idx && e.pubkey === pubkey2);
+}
 
 // node_modules/@frostr/bifrost/dist/lib/session.js
 var GET_DEFAULT_SESSION_CONFIG = () => {
   return {
     content: null,
-    stamp: now(),
+    stamp: now2(),
     type: "message"
   };
 };
 function create_session_template(members, messages, options = {}) {
   const hashes = typeof messages === "string" ? [[messages]] : messages;
-  const schema = schema_default.sign.template;
+  const schema = schema_default2.sign.template;
   const parsed = schema.safeParse(__spreadProps(__spreadValues(__spreadValues({}, GET_DEFAULT_SESSION_CONFIG()), options), {
     hashes,
     members: members.sort()
@@ -32779,14 +33761,14 @@ function get_session_ctx(group2, session2) {
 // node_modules/@frostr/bifrost/dist/lib/sign.js
 function create_psig_pkg(ctx, share2) {
   const sid = ctx.session.sid;
-  const pubkey2 = get_pubkey(share2.seckey, "ecdsa");
+  const pubkey2 = get_pubkey3(share2.seckey, "ecdsa");
   const sighashes = ctx.session.hashes.map((e) => e[0]);
   const sig_shares = create_member_shares(ctx.session, share2);
   const psigs = sighashes.map((sighash) => {
     const sig_share = sig_shares.find((e) => e.sighash === sighash);
     const sig_ctx = ctx.sigmap.get(sighash);
-    Assert.exists(sig_share, "share not found for sighash: " + sighash);
-    Assert.exists(sig_ctx, "context not found for sighash: " + sighash);
+    Assert2.exists(sig_share, "share not found for sighash: " + sighash);
+    Assert2.exists(sig_ctx, "context not found for sighash: " + sighash);
     const psig = create_partial_sig(sig_ctx, sig_share);
     return [sighash, psig];
   });
@@ -32821,7 +33803,7 @@ function combine_signature_pkgs(ctx, pkgs) {
   const sigs = [];
   for (const [sighash, sigctx] of ctx.sigmap.entries()) {
     const psigs = records.filter((e) => e.sighash === sighash);
-    Assert.ok(psigs.length === count, "missing partial signatures for sighash: " + sighash);
+    Assert2.ok(psigs.length === count, "missing partial signatures for sighash: " + sighash);
     const pubkey2 = sigctx.group_pk;
     const sig = combine_partial_sigs(sigctx, psigs);
     sigs.push([sighash, pubkey2, sig]);
@@ -32832,1429 +33814,8 @@ function create_partial_sig(ctx, share2) {
   const { idx, binder_sn, hidden_sn, seckey } = share2;
   const secshare = { idx, seckey };
   const secnonce = { idx, binder_sn, hidden_sn };
-  const psig_pkg2 = sign_msg(ctx, secshare, secnonce);
+  const psig_pkg2 = sign_msg2(ctx, secshare, secnonce);
   return psig_pkg2.psig;
-}
-
-// node_modules/@frostr/bifrost/dist/lib/util.js
-function select_random_peers(peers, thold) {
-  const rnd = () => Math.random() > 0.5 ? 1 : -1;
-  const idx = Math.min(peers.length, thold - 1);
-  return peers.sort(rnd).slice(0, idx);
-}
-function get_member_indexes(group2, pubkeys) {
-  const indexes = group2.commits.filter((e) => pubkeys.includes(convert_pubkey(e.pubkey, "bip340"))).map((e) => e.idx);
-  Assert.ok(indexes.length === pubkeys.length, "index count does not match pubkey count");
-  return indexes;
-}
-
-// src/components/settings/group.tsx
-var import_jsx_runtime2 = __toESM(require_jsx_runtime());
-function group_default({ store }) {
-  var _a;
-  const [input, setInput] = (0, import_react.useState)("");
-  const [error, setError] = (0, import_react.useState)(null);
-  const [show, setShow] = (0, import_react.useState)(false);
-  const [saved, setSaved] = (0, import_react.useState)(false);
-  const update = () => {
-    if (error !== null) return;
-    if (input === "") {
-      store.update({ group: null });
-    } else {
-      const group2 = get_group_pkg(input);
-      if (group2 === null) return;
-      store.update({ group: group2 });
-    }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
-  };
-  (0, import_react.useEffect)(() => {
-    const unsubscribe = store.subscribe(() => {
-      const group2 = store.get().group;
-      if (group2 === null) {
-        setInput("");
-      } else {
-        setInput(encode_group_pkg(group2));
-      }
-      setError(null);
-    });
-    return () => unsubscribe();
-  }, [store]);
-  (0, import_react.useEffect)(() => {
-    if (input === "") {
-      setError(null);
-    } else if (!input.startsWith("bfgroup")) {
-      setError('input must start with "bfgroup1"');
-    } else if (!is_group_string(input)) {
-      setError("input contains invalid characters");
-    } else {
-      const pkg = get_group_pkg(input);
-      if (pkg !== null) {
-        setError(null);
-      } else {
-        setError("failed to decode package data");
-      }
-    }
-  }, [input]);
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h2", { className: "section-header", children: "Group Package" }),
-    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { className: "description", children: "Paste your encoded group package (starts with bfgroup). It contains information about the members of your signing group." }),
-    /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "content-container", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "input-with-button", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-          "input",
-          {
-            type: show ? "text" : "password",
-            value: input,
-            onChange: (e) => setInput(e.target.value.trim()),
-            placeholder: "bfgroup1..."
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "input-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-            "button",
-            {
-              className: "button",
-              onClick: () => setShow(!show),
-              children: show ? "hide" : "show"
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-            "button",
-            {
-              className: "button action-button ".concat(saved ? "saved-button" : ""),
-              onClick: update,
-              disabled: !is_group_changed(input, store.get().group) || error !== null,
-              children: saved ? "Saved" : "Save"
-            }
-          )
-        ] })
-      ] }),
-      input !== "" && error === null && show && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("pre", { className: "code-display", children: (_a = get_group_json(input)) != null ? _a : "invalid group package" }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "notification-container", children: error && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { className: "error-text", children: error }) })
-    ] })
-  ] });
-}
-function is_group_string(input) {
-  return /^bfgroup1[023456789acdefghjklmnpqrstuvwxyz]+$/.test(input);
-}
-function is_group_changed(input, group2) {
-  const group_str = get_group_str(group2);
-  return input !== group_str;
-}
-function get_group_str(group2) {
-  try {
-    return group2 !== null ? encode_group_pkg(group2) : "";
-  } catch (e) {
-    return "";
-  }
-}
-function get_group_pkg(input) {
-  try {
-    return input !== "" ? decode_group_pkg(input) : null;
-  } catch (e) {
-    return null;
-  }
-}
-function get_group_json(input) {
-  try {
-    const group2 = get_group_pkg(input);
-    if (group2 === null) return null;
-    return JSON.stringify(group2, null, 2);
-  } catch (err) {
-    return null;
-  }
-}
-
-// src/components/settings/peers.tsx
-var import_react2 = __toESM(require_react());
-var import_jsx_runtime3 = __toESM(require_jsx_runtime());
-function peers_default({ store }) {
-  const [peers, setPeers] = (0, import_react2.useState)(store.get().peers);
-  const [changes, setChanges] = (0, import_react2.useState)(false);
-  const [saved, setSaved] = (0, import_react2.useState)(false);
-  const update = () => {
-    setChanges(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
-  };
-  const cancel = () => {
-    setPeers(store.get().peers);
-    setChanges(false);
-  };
-  const update_peer = (idx, key, value) => {
-    setPeers((prev) => {
-      const updated = [...prev != null ? prev : []];
-      updated[idx][key] = value;
-      return updated;
-    });
-    setChanges(true);
-  };
-  (0, import_react2.useEffect)(() => {
-    const unsubscribe = store.subscribe(() => {
-      setPeers(store.get().peers);
-    });
-    return () => unsubscribe();
-  }, [store]);
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h2", { className: "section-header", children: "Peer Connections" }),
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "description", children: 'Configure how you communicate with other peers in your signing group. "Request" will send signature requests to that peer, and "Respond" will co-sign requests from that peer.' }),
-    peers === null && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "description", children: "You must configure your node's credentials first." }),
-    peers !== null && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { children: "Peer Public Key" }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "checkbox-cell", children: "Request" }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "checkbox-cell", children: "Respond" })
-        ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tbody", { children: peers.map((peer, idx) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "pubkey-cell", children: peer[0] }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-            "input",
-            {
-              type: "checkbox",
-              className: "peer-checkbox",
-              checked: peer[1],
-              onChange: () => update_peer(idx, 1, !peer[1])
-            }
-          ) }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-            "input",
-            {
-              type: "checkbox",
-              className: "peer-checkbox",
-              checked: peer[2],
-              onChange: () => update_peer(idx, 2, !peer[2])
-            }
-          ) })
-        ] }, idx)) })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "action-buttons", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-          "button",
-          {
-            onClick: update,
-            disabled: !changes,
-            className: "button button-primary action-button ".concat(saved ? "saved-button" : ""),
-            children: saved ? "Saved" : "Save"
-          }
-        ),
-        changes && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-          "button",
-          {
-            onClick: cancel,
-            className: "button",
-            children: "Cancel"
-          }
-        )
-      ] })
-    ] })
-  ] });
-}
-
-// src/components/settings/relays.tsx
-var import_react3 = __toESM(require_react());
-var import_jsx_runtime4 = __toESM(require_jsx_runtime());
-function relays_default({ store }) {
-  const [relays, setRelays] = (0, import_react3.useState)(store.get().relays);
-  const [relayUrl, setUrl] = (0, import_react3.useState)("");
-  const [changes, setChanges] = (0, import_react3.useState)(false);
-  const [error, setError] = (0, import_react3.useState)(null);
-  const [saved, setSaved] = (0, import_react3.useState)(false);
-  const update = () => {
-    store.update({ relays });
-    setChanges(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
-  };
-  const cancel = () => {
-    setRelays(store.get().relays);
-    setChanges(false);
-  };
-  const update_relay = (idx, key) => {
-    setRelays((prev) => {
-      const updated = [...prev];
-      updated[idx][key] = !updated[idx][key];
-      return updated;
-    });
-    setChanges(true);
-  };
-  const add_relay = () => {
-    if (!relayUrl.trim()) return;
-    if (!(relayUrl.startsWith("wss://") || relayUrl.startsWith("ws://"))) {
-      setError("Relay URL must start with wss:// or ws://");
-    } else if (!validateUrl(relayUrl)) {
-      setError("Invalid URL format");
-    } else if (relays.some((relay) => relay.url === relayUrl)) {
-      setError("Relay already exists");
-    } else {
-      setRelays((prev) => [...prev, { url: relayUrl, read: true, write: true }]);
-      setUrl("");
-      setChanges(true);
-    }
-  };
-  const remove_relay = (idx) => {
-    setRelays((prev) => prev.filter((_, i2) => i2 !== idx));
-    setChanges(true);
-  };
-  (0, import_react3.useEffect)(() => {
-    const unsubscribe = store.subscribe(() => {
-      setRelays(store.get().relays);
-    });
-    return () => unsubscribe();
-  }, [store]);
-  (0, import_react3.useEffect)(() => {
-    if (error !== null) setError(null);
-  }, [relayUrl]);
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h2", { className: "section-header", children: "Relay Connections" }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "description", children: 'Configure which relays your node will use to communicate. "Read" will enable listening for inbound requests, and "Write" will enable publishing outbound requests.' }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("table", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("tr", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "url-column", children: "Relay URL" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "checkbox-cell", children: "Read" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "checkbox-cell", children: "Write" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "action-cell", children: "Actions" })
-      ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tbody", { children: relays.map((relay, idx) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("tr", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { children: relay.url }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-          "input",
-          {
-            type: "checkbox",
-            className: "relay-checkbox",
-            checked: relay.read,
-            onChange: () => update_relay(idx, "read")
-          }
-        ) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-          "input",
-          {
-            type: "checkbox",
-            className: "relay-checkbox",
-            checked: relay.write,
-            onChange: () => update_relay(idx, "write")
-          }
-        ) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "action-cell", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-          "button",
-          {
-            onClick: () => remove_relay(idx),
-            className: "button button-remove",
-            children: "Remove"
-          }
-        ) })
-      ] }, idx)) })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "input-group relay-controls", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-        "input",
-        {
-          type: "text",
-          value: relayUrl,
-          onChange: (e) => setUrl(e.target.value),
-          placeholder: "wss://relay.example.com",
-          className: "relay-input"
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { onClick: add_relay, className: "button add-relay-button", children: "Add Relay" })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "action-buttons", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-        "button",
-        {
-          onClick: update,
-          disabled: !changes,
-          className: "button button-primary action-button ".concat(saved ? "saved-button" : ""),
-          children: saved ? "Saved" : "Save"
-        }
-      ),
-      changes && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-        "button",
-        {
-          onClick: cancel,
-          className: "button",
-          children: "Cancel"
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "notification-container", children: error && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "error-text", children: error }) })
-    ] })
-  ] });
-}
-function validateUrl(url2) {
-  try {
-    new URL(url2);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-// src/components/settings/share.tsx
-var import_react4 = __toESM(require_react());
-var import_jsx_runtime5 = __toESM(require_jsx_runtime());
-function share_default({ store }) {
-  var _a;
-  const [input, setInput] = (0, import_react4.useState)("");
-  const [error, setError] = (0, import_react4.useState)(null);
-  const [show, setShow] = (0, import_react4.useState)(false);
-  const [saved, setSaved] = (0, import_react4.useState)(false);
-  const update = () => {
-    if (error !== null) return;
-    if (input === "") {
-      store.update({ share: null });
-    } else {
-      const share2 = get_share_pkg(input);
-      if (share2 === null) return;
-      store.update({ share: share2 });
-    }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
-  };
-  (0, import_react4.useEffect)(() => {
-    const unsubscribe = store.subscribe(() => {
-      const share2 = store.get().share;
-      if (share2 === null) {
-        setInput("");
-      } else {
-        setInput(encode_share_pkg(share2));
-      }
-      setError(null);
-    });
-    return () => unsubscribe();
-  }, [store]);
-  (0, import_react4.useEffect)(() => {
-    if (input === "") {
-      setError(null);
-    } else if (!input.startsWith("bfshare")) {
-      setError('input must start with "bfshare1"');
-    } else if (!is_share_string(input)) {
-      setError("input contains invalid characters");
-    } else {
-      const share2 = get_share_pkg(input);
-      if (share2 !== null) {
-        setError(null);
-      } else {
-        setError("failed to decode package data");
-      }
-    }
-  }, [input]);
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { className: "section-header", children: "Share Package" }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "description", children: "Paste your encoded share package (starts with bfshare). It contains secret information required for signing. Do not share it with anyone." }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "content-container", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "input-with-button", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-          "input",
-          {
-            type: show ? "text" : "password",
-            value: input,
-            placeholder: "bfshare1...",
-            onChange: (e) => setInput(e.target.value.trim())
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "input-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-            "button",
-            {
-              className: "button",
-              onClick: () => setShow(!show),
-              children: show ? "hide" : "show"
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-            "button",
-            {
-              className: "button action-button ".concat(saved ? "saved-button" : ""),
-              onClick: update,
-              disabled: !is_share_changed(input, store.get().share) || error !== null,
-              children: saved ? "Saved" : "Save"
-            }
-          )
-        ] })
-      ] }),
-      input !== "" && error === null && show && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("pre", { className: "code-display", children: (_a = get_share_json(input)) != null ? _a : "invalid share package" }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "notification-container", children: error && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "error-text", children: error }) })
-    ] })
-  ] });
-}
-function is_share_string(input) {
-  return /^bfshare1[023456789acdefghjklmnpqrstuvwxyz]+$/.test(input);
-}
-function is_share_changed(input, share2) {
-  const share_str = get_share_str(share2);
-  return input !== share_str;
-}
-function get_share_str(share2) {
-  try {
-    return share2 !== null ? encode_share_pkg(share2) : "";
-  } catch (e) {
-    return "";
-  }
-}
-function get_share_pkg(input) {
-  try {
-    return input !== "" ? decode_share_pkg(input) : null;
-  } catch (e) {
-    return null;
-  }
-}
-function get_share_json(input) {
-  try {
-    const share2 = get_share_pkg(input);
-    if (share2 === null) return null;
-    return JSON.stringify(share2, null, 2);
-  } catch (err) {
-    return null;
-  }
-}
-
-// src/components/settings/index.tsx
-var import_jsx_runtime6 = __toESM(require_jsx_runtime());
-function settings_default({ store }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(share_default, { store }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(group_default, { store }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(peers_default, { store }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(relays_default, { store })
-  ] });
-}
-
-// node_modules/@noble/ciphers/esm/utils.js
-function isBytes4(a) {
-  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
-}
-function abool2(b) {
-  if (typeof b !== "boolean")
-    throw new Error("boolean expected, not ".concat(b));
-}
-function abytes4(b, ...lengths) {
-  if (!isBytes4(b))
-    throw new Error("Uint8Array expected");
-  if (lengths.length > 0 && !lengths.includes(b.length))
-    throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b.length);
-}
-function aexists2(instance, checkFinished = true) {
-  if (instance.destroyed)
-    throw new Error("Hash instance has been destroyed");
-  if (checkFinished && instance.finished)
-    throw new Error("Hash#digest() has already been called");
-}
-function aoutput2(out, instance) {
-  abytes4(out);
-  const min = instance.outputLen;
-  if (out.length < min) {
-    throw new Error("digestInto() expects output buffer of length at least " + min);
-  }
-}
-function u8(arr) {
-  return new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength);
-}
-function u32(arr) {
-  return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
-}
-function clean2(...arrays) {
-  for (let i2 = 0; i2 < arrays.length; i2++) {
-    arrays[i2].fill(0);
-  }
-}
-function createView2(arr) {
-  return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
-}
-var isLE = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
-function utf8ToBytes3(str3) {
-  if (typeof str3 !== "string")
-    throw new Error("string expected");
-  return new Uint8Array(new TextEncoder().encode(str3));
-}
-function toBytes2(data) {
-  if (typeof data === "string")
-    data = utf8ToBytes3(data);
-  else if (isBytes4(data))
-    data = copyBytes(data);
-  else
-    throw new Error("Uint8Array expected, got " + typeof data);
-  return data;
-}
-function equalBytes(a, b) {
-  if (a.length !== b.length)
-    return false;
-  let diff = 0;
-  for (let i2 = 0; i2 < a.length; i2++)
-    diff |= a[i2] ^ b[i2];
-  return diff === 0;
-}
-var wrapCipher = /* @__NO_SIDE_EFFECTS__ */ (params, constructor) => {
-  function wrappedCipher(key, ...args) {
-    abytes4(key);
-    if (!isLE)
-      throw new Error("Non little-endian hardware is not yet supported");
-    if (params.nonceLength !== void 0) {
-      const nonce = args[0];
-      if (!nonce)
-        throw new Error("nonce / iv required");
-      if (params.varSizeNonce)
-        abytes4(nonce);
-      else
-        abytes4(nonce, params.nonceLength);
-    }
-    const tagl = params.tagLength;
-    if (tagl && args[1] !== void 0) {
-      abytes4(args[1]);
-    }
-    const cipher = constructor(key, ...args);
-    const checkOutput = (fnLength, output4) => {
-      if (output4 !== void 0) {
-        if (fnLength !== 2)
-          throw new Error("cipher output not supported");
-        abytes4(output4);
-      }
-    };
-    let called = false;
-    const wrCipher = {
-      encrypt(data, output4) {
-        if (called)
-          throw new Error("cannot encrypt() twice with same key + nonce");
-        called = true;
-        abytes4(data);
-        checkOutput(cipher.encrypt.length, output4);
-        return cipher.encrypt(data, output4);
-      },
-      decrypt(data, output4) {
-        abytes4(data);
-        if (tagl && data.length < tagl)
-          throw new Error("invalid ciphertext length: smaller than tagLength=" + tagl);
-        checkOutput(cipher.decrypt.length, output4);
-        return cipher.decrypt(data, output4);
-      }
-    };
-    return wrCipher;
-  }
-  Object.assign(wrappedCipher, params);
-  return wrappedCipher;
-};
-function getOutput(expectedLength, out, onlyAligned = true) {
-  if (out === void 0)
-    return new Uint8Array(expectedLength);
-  if (out.length !== expectedLength)
-    throw new Error("invalid output length, expected " + expectedLength + ", got: " + out.length);
-  if (onlyAligned && !isAligned32(out))
-    throw new Error("invalid output, must be aligned");
-  return out;
-}
-function setBigUint642(view, byteOffset, value, isLE5) {
-  if (typeof view.setBigUint64 === "function")
-    return view.setBigUint64(byteOffset, value, isLE5);
-  const _32n = BigInt(32);
-  const _u32_max = BigInt(4294967295);
-  const wh = Number(value >> _32n & _u32_max);
-  const wl = Number(value & _u32_max);
-  const h = isLE5 ? 4 : 0;
-  const l = isLE5 ? 0 : 4;
-  view.setUint32(byteOffset + h, wh, isLE5);
-  view.setUint32(byteOffset + l, wl, isLE5);
-}
-function u64Lengths(dataLength, aadLength, isLE5) {
-  abool2(isLE5);
-  const num4 = new Uint8Array(16);
-  const view = createView2(num4);
-  setBigUint642(view, 0, BigInt(aadLength), isLE5);
-  setBigUint642(view, 8, BigInt(dataLength), isLE5);
-  return num4;
-}
-function isAligned32(bytes4) {
-  return bytes4.byteOffset % 4 === 0;
-}
-function copyBytes(bytes4) {
-  return Uint8Array.from(bytes4);
-}
-
-// node_modules/@noble/ciphers/esm/_polyval.js
-var BLOCK_SIZE = 16;
-var ZEROS16 = /* @__PURE__ */ new Uint8Array(16);
-var ZEROS32 = u32(ZEROS16);
-var POLY = 225;
-var mul2 = (s0, s1, s2, s3) => {
-  const hiBit = s3 & 1;
-  return {
-    s3: s2 << 31 | s3 >>> 1,
-    s2: s1 << 31 | s2 >>> 1,
-    s1: s0 << 31 | s1 >>> 1,
-    s0: s0 >>> 1 ^ POLY << 24 & -(hiBit & 1)
-    // reduce % poly
-  };
-};
-var swapLE = (n) => (n >>> 0 & 255) << 24 | (n >>> 8 & 255) << 16 | (n >>> 16 & 255) << 8 | n >>> 24 & 255 | 0;
-function _toGHASHKey(k) {
-  k.reverse();
-  const hiBit = k[15] & 1;
-  let carry = 0;
-  for (let i2 = 0; i2 < k.length; i2++) {
-    const t = k[i2];
-    k[i2] = t >>> 1 | carry;
-    carry = (t & 1) << 7;
-  }
-  k[0] ^= -hiBit & 225;
-  return k;
-}
-var estimateWindow = (bytes4) => {
-  if (bytes4 > 64 * 1024)
-    return 8;
-  if (bytes4 > 1024)
-    return 4;
-  return 2;
-};
-var GHASH = class {
-  // We select bits per window adaptively based on expectedLength
-  constructor(key, expectedLength) {
-    this.blockLen = BLOCK_SIZE;
-    this.outputLen = BLOCK_SIZE;
-    this.s0 = 0;
-    this.s1 = 0;
-    this.s2 = 0;
-    this.s3 = 0;
-    this.finished = false;
-    key = toBytes2(key);
-    abytes4(key, 16);
-    const kView = createView2(key);
-    let k0 = kView.getUint32(0, false);
-    let k1 = kView.getUint32(4, false);
-    let k2 = kView.getUint32(8, false);
-    let k3 = kView.getUint32(12, false);
-    const doubles = [];
-    for (let i2 = 0; i2 < 128; i2++) {
-      doubles.push({ s0: swapLE(k0), s1: swapLE(k1), s2: swapLE(k2), s3: swapLE(k3) });
-      ({ s0: k0, s1: k1, s2: k2, s3: k3 } = mul2(k0, k1, k2, k3));
-    }
-    const W = estimateWindow(expectedLength || 1024);
-    if (![1, 2, 4, 8].includes(W))
-      throw new Error("ghash: invalid window size, expected 2, 4 or 8");
-    this.W = W;
-    const bits = 128;
-    const windows = bits / W;
-    const windowSize = this.windowSize = 2 ** W;
-    const items = [];
-    for (let w = 0; w < windows; w++) {
-      for (let byte = 0; byte < windowSize; byte++) {
-        let s0 = 0, s1 = 0, s2 = 0, s3 = 0;
-        for (let j = 0; j < W; j++) {
-          const bit = byte >>> W - j - 1 & 1;
-          if (!bit)
-            continue;
-          const { s0: d0, s1: d1, s2: d2, s3: d3 } = doubles[W * w + j];
-          s0 ^= d0, s1 ^= d1, s2 ^= d2, s3 ^= d3;
-        }
-        items.push({ s0, s1, s2, s3 });
-      }
-    }
-    this.t = items;
-  }
-  _updateBlock(s0, s1, s2, s3) {
-    s0 ^= this.s0, s1 ^= this.s1, s2 ^= this.s2, s3 ^= this.s3;
-    const { W, t, windowSize } = this;
-    let o0 = 0, o1 = 0, o2 = 0, o3 = 0;
-    const mask = (1 << W) - 1;
-    let w = 0;
-    for (const num4 of [s0, s1, s2, s3]) {
-      for (let bytePos = 0; bytePos < 4; bytePos++) {
-        const byte = num4 >>> 8 * bytePos & 255;
-        for (let bitPos = 8 / W - 1; bitPos >= 0; bitPos--) {
-          const bit = byte >>> W * bitPos & mask;
-          const { s0: e0, s1: e1, s2: e2, s3: e3 } = t[w * windowSize + bit];
-          o0 ^= e0, o1 ^= e1, o2 ^= e2, o3 ^= e3;
-          w += 1;
-        }
-      }
-    }
-    this.s0 = o0;
-    this.s1 = o1;
-    this.s2 = o2;
-    this.s3 = o3;
-  }
-  update(data) {
-    aexists2(this);
-    data = toBytes2(data);
-    abytes4(data);
-    const b32 = u32(data);
-    const blocks = Math.floor(data.length / BLOCK_SIZE);
-    const left = data.length % BLOCK_SIZE;
-    for (let i2 = 0; i2 < blocks; i2++) {
-      this._updateBlock(b32[i2 * 4 + 0], b32[i2 * 4 + 1], b32[i2 * 4 + 2], b32[i2 * 4 + 3]);
-    }
-    if (left) {
-      ZEROS16.set(data.subarray(blocks * BLOCK_SIZE));
-      this._updateBlock(ZEROS32[0], ZEROS32[1], ZEROS32[2], ZEROS32[3]);
-      clean2(ZEROS32);
-    }
-    return this;
-  }
-  destroy() {
-    const { t } = this;
-    for (const elm of t) {
-      elm.s0 = 0, elm.s1 = 0, elm.s2 = 0, elm.s3 = 0;
-    }
-  }
-  digestInto(out) {
-    aexists2(this);
-    aoutput2(out, this);
-    this.finished = true;
-    const { s0, s1, s2, s3 } = this;
-    const o32 = u32(out);
-    o32[0] = s0;
-    o32[1] = s1;
-    o32[2] = s2;
-    o32[3] = s3;
-    return out;
-  }
-  digest() {
-    const res = new Uint8Array(BLOCK_SIZE);
-    this.digestInto(res);
-    this.destroy();
-    return res;
-  }
-};
-var Polyval = class extends GHASH {
-  constructor(key, expectedLength) {
-    key = toBytes2(key);
-    abytes4(key);
-    const ghKey = _toGHASHKey(copyBytes(key));
-    super(ghKey, expectedLength);
-    clean2(ghKey);
-  }
-  update(data) {
-    data = toBytes2(data);
-    aexists2(this);
-    const b32 = u32(data);
-    const left = data.length % BLOCK_SIZE;
-    const blocks = Math.floor(data.length / BLOCK_SIZE);
-    for (let i2 = 0; i2 < blocks; i2++) {
-      this._updateBlock(swapLE(b32[i2 * 4 + 3]), swapLE(b32[i2 * 4 + 2]), swapLE(b32[i2 * 4 + 1]), swapLE(b32[i2 * 4 + 0]));
-    }
-    if (left) {
-      ZEROS16.set(data.subarray(blocks * BLOCK_SIZE));
-      this._updateBlock(swapLE(ZEROS32[3]), swapLE(ZEROS32[2]), swapLE(ZEROS32[1]), swapLE(ZEROS32[0]));
-      clean2(ZEROS32);
-    }
-    return this;
-  }
-  digestInto(out) {
-    aexists2(this);
-    aoutput2(out, this);
-    this.finished = true;
-    const { s0, s1, s2, s3 } = this;
-    const o32 = u32(out);
-    o32[0] = s0;
-    o32[1] = s1;
-    o32[2] = s2;
-    o32[3] = s3;
-    return out.reverse();
-  }
-};
-function wrapConstructorWithKey(hashCons) {
-  const hashC = (msg, key) => hashCons(key, msg.length).update(toBytes2(msg)).digest();
-  const tmp = hashCons(new Uint8Array(16), 0);
-  hashC.outputLen = tmp.outputLen;
-  hashC.blockLen = tmp.blockLen;
-  hashC.create = (key, expectedLength) => hashCons(key, expectedLength);
-  return hashC;
-}
-var ghash = wrapConstructorWithKey((key, expectedLength) => new GHASH(key, expectedLength));
-var polyval = wrapConstructorWithKey((key, expectedLength) => new Polyval(key, expectedLength));
-
-// node_modules/@noble/ciphers/esm/aes.js
-var BLOCK_SIZE2 = 16;
-var BLOCK_SIZE32 = 4;
-var EMPTY_BLOCK = /* @__PURE__ */ new Uint8Array(BLOCK_SIZE2);
-var POLY2 = 283;
-function mul22(n) {
-  return n << 1 ^ POLY2 & -(n >> 7);
-}
-function mul(a, b) {
-  let res = 0;
-  for (; b > 0; b >>= 1) {
-    res ^= a & -(b & 1);
-    a = mul22(a);
-  }
-  return res;
-}
-var sbox = /* @__PURE__ */ (() => {
-  const t = new Uint8Array(256);
-  for (let i2 = 0, x = 1; i2 < 256; i2++, x ^= mul22(x))
-    t[i2] = x;
-  const box = new Uint8Array(256);
-  box[0] = 99;
-  for (let i2 = 0; i2 < 255; i2++) {
-    let x = t[255 - i2];
-    x |= x << 8;
-    box[t[i2]] = (x ^ x >> 4 ^ x >> 5 ^ x >> 6 ^ x >> 7 ^ 99) & 255;
-  }
-  clean2(t);
-  return box;
-})();
-var rotr32_8 = (n) => n << 24 | n >>> 8;
-var rotl32_8 = (n) => n << 8 | n >>> 24;
-function genTtable(sbox3, fn) {
-  if (sbox3.length !== 256)
-    throw new Error("Wrong sbox length");
-  const T0 = new Uint32Array(256).map((_, j) => fn(sbox3[j]));
-  const T1 = T0.map(rotl32_8);
-  const T2 = T1.map(rotl32_8);
-  const T3 = T2.map(rotl32_8);
-  const T01 = new Uint32Array(256 * 256);
-  const T23 = new Uint32Array(256 * 256);
-  const sbox22 = new Uint16Array(256 * 256);
-  for (let i2 = 0; i2 < 256; i2++) {
-    for (let j = 0; j < 256; j++) {
-      const idx = i2 * 256 + j;
-      T01[idx] = T0[i2] ^ T1[j];
-      T23[idx] = T2[i2] ^ T3[j];
-      sbox22[idx] = sbox3[i2] << 8 | sbox3[j];
-    }
-  }
-  return { sbox: sbox3, sbox2: sbox22, T0, T1, T2, T3, T01, T23 };
-}
-var tableEncoding = /* @__PURE__ */ genTtable(sbox, (s) => mul(s, 3) << 24 | s << 16 | s << 8 | mul(s, 2));
-var xPowers = /* @__PURE__ */ (() => {
-  const p = new Uint8Array(16);
-  for (let i2 = 0, x = 1; i2 < 16; i2++, x = mul22(x))
-    p[i2] = x;
-  return p;
-})();
-function expandKeyLE(key) {
-  abytes4(key);
-  const len = key.length;
-  if (![16, 24, 32].includes(len))
-    throw new Error("aes: invalid key size, should be 16, 24 or 32, got " + len);
-  const { sbox2: sbox22 } = tableEncoding;
-  const toClean = [];
-  if (!isAligned32(key))
-    toClean.push(key = copyBytes(key));
-  const k32 = u32(key);
-  const Nk = k32.length;
-  const subByte = (n) => applySbox(sbox22, n, n, n, n);
-  const xk = new Uint32Array(len + 28);
-  xk.set(k32);
-  for (let i2 = Nk; i2 < xk.length; i2++) {
-    let t = xk[i2 - 1];
-    if (i2 % Nk === 0)
-      t = subByte(rotr32_8(t)) ^ xPowers[i2 / Nk - 1];
-    else if (Nk > 6 && i2 % Nk === 4)
-      t = subByte(t);
-    xk[i2] = xk[i2 - Nk] ^ t;
-  }
-  clean2(...toClean);
-  return xk;
-}
-function apply0123(T01, T23, s0, s1, s2, s3) {
-  return T01[s0 << 8 & 65280 | s1 >>> 8 & 255] ^ T23[s2 >>> 8 & 65280 | s3 >>> 24 & 255];
-}
-function applySbox(sbox22, s0, s1, s2, s3) {
-  return sbox22[s0 & 255 | s1 & 65280] | sbox22[s2 >>> 16 & 255 | s3 >>> 16 & 65280] << 16;
-}
-function encrypt(xk, s0, s1, s2, s3) {
-  const { sbox2: sbox22, T01, T23 } = tableEncoding;
-  let k = 0;
-  s0 ^= xk[k++], s1 ^= xk[k++], s2 ^= xk[k++], s3 ^= xk[k++];
-  const rounds = xk.length / 4 - 2;
-  for (let i2 = 0; i2 < rounds; i2++) {
-    const t02 = xk[k++] ^ apply0123(T01, T23, s0, s1, s2, s3);
-    const t12 = xk[k++] ^ apply0123(T01, T23, s1, s2, s3, s0);
-    const t22 = xk[k++] ^ apply0123(T01, T23, s2, s3, s0, s1);
-    const t32 = xk[k++] ^ apply0123(T01, T23, s3, s0, s1, s2);
-    s0 = t02, s1 = t12, s2 = t22, s3 = t32;
-  }
-  const t0 = xk[k++] ^ applySbox(sbox22, s0, s1, s2, s3);
-  const t1 = xk[k++] ^ applySbox(sbox22, s1, s2, s3, s0);
-  const t2 = xk[k++] ^ applySbox(sbox22, s2, s3, s0, s1);
-  const t3 = xk[k++] ^ applySbox(sbox22, s3, s0, s1, s2);
-  return { s0: t0, s1: t1, s2: t2, s3: t3 };
-}
-function ctr32(xk, isLE5, nonce, src, dst) {
-  abytes4(nonce, BLOCK_SIZE2);
-  abytes4(src);
-  dst = getOutput(src.length, dst);
-  const ctr3 = nonce;
-  const c32 = u32(ctr3);
-  const view = createView2(ctr3);
-  const src32 = u32(src);
-  const dst32 = u32(dst);
-  const ctrPos = isLE5 ? 0 : 12;
-  const srcLen = src.length;
-  let ctrNum = view.getUint32(ctrPos, isLE5);
-  let { s0, s1, s2, s3 } = encrypt(xk, c32[0], c32[1], c32[2], c32[3]);
-  for (let i2 = 0; i2 + 4 <= src32.length; i2 += 4) {
-    dst32[i2 + 0] = src32[i2 + 0] ^ s0;
-    dst32[i2 + 1] = src32[i2 + 1] ^ s1;
-    dst32[i2 + 2] = src32[i2 + 2] ^ s2;
-    dst32[i2 + 3] = src32[i2 + 3] ^ s3;
-    ctrNum = ctrNum + 1 >>> 0;
-    view.setUint32(ctrPos, ctrNum, isLE5);
-    ({ s0, s1, s2, s3 } = encrypt(xk, c32[0], c32[1], c32[2], c32[3]));
-  }
-  const start = BLOCK_SIZE2 * Math.floor(src32.length / BLOCK_SIZE32);
-  if (start < srcLen) {
-    const b32 = new Uint32Array([s0, s1, s2, s3]);
-    const buf = u8(b32);
-    for (let i2 = start, pos = 0; i2 < srcLen; i2++, pos++)
-      dst[i2] = src[i2] ^ buf[pos];
-    clean2(b32);
-  }
-  return dst;
-}
-function computeTag(fn, isLE5, key, data, AAD) {
-  const aadLength = AAD ? AAD.length : 0;
-  const h = fn.create(key, data.length + aadLength);
-  if (AAD)
-    h.update(AAD);
-  const num4 = u64Lengths(8 * data.length, 8 * aadLength, isLE5);
-  h.update(data);
-  h.update(num4);
-  const res = h.digest();
-  clean2(num4);
-  return res;
-}
-var gcm = /* @__PURE__ */ wrapCipher({ blockSize: 16, nonceLength: 12, tagLength: 16, varSizeNonce: true }, function aesgcm(key, nonce, AAD) {
-  if (nonce.length < 8)
-    throw new Error("aes/gcm: invalid nonce length");
-  const tagLength = 16;
-  function _computeTag(authKey, tagMask, data) {
-    const tag = computeTag(ghash, false, authKey, data, AAD);
-    for (let i2 = 0; i2 < tagMask.length; i2++)
-      tag[i2] ^= tagMask[i2];
-    return tag;
-  }
-  function deriveKeys() {
-    const xk = expandKeyLE(key);
-    const authKey = EMPTY_BLOCK.slice();
-    const counter = EMPTY_BLOCK.slice();
-    ctr32(xk, false, counter, counter, authKey);
-    if (nonce.length === 12) {
-      counter.set(nonce);
-    } else {
-      const nonceLen = EMPTY_BLOCK.slice();
-      const view = createView2(nonceLen);
-      setBigUint642(view, 8, BigInt(nonce.length * 8), false);
-      const g = ghash.create(authKey).update(nonce).update(nonceLen);
-      g.digestInto(counter);
-      g.destroy();
-    }
-    const tagMask = ctr32(xk, false, counter, EMPTY_BLOCK);
-    return { xk, authKey, counter, tagMask };
-  }
-  return {
-    encrypt(plaintext) {
-      const { xk, authKey, counter, tagMask } = deriveKeys();
-      const out = new Uint8Array(plaintext.length + tagLength);
-      const toClean = [xk, authKey, counter, tagMask];
-      if (!isAligned32(plaintext))
-        toClean.push(plaintext = copyBytes(plaintext));
-      ctr32(xk, false, counter, plaintext, out.subarray(0, plaintext.length));
-      const tag = _computeTag(authKey, tagMask, out.subarray(0, out.length - tagLength));
-      toClean.push(tag);
-      out.set(tag, plaintext.length);
-      clean2(...toClean);
-      return out;
-    },
-    decrypt(ciphertext) {
-      const { xk, authKey, counter, tagMask } = deriveKeys();
-      const toClean = [xk, authKey, tagMask, counter];
-      if (!isAligned32(ciphertext))
-        toClean.push(ciphertext = copyBytes(ciphertext));
-      const data = ciphertext.subarray(0, -tagLength);
-      const passedTag = ciphertext.subarray(-tagLength);
-      const tag = _computeTag(authKey, tagMask, data);
-      toClean.push(tag);
-      if (!equalBytes(tag, passedTag))
-        throw new Error("aes/gcm: invalid ghash tag");
-      const out = ctr32(xk, false, counter, data);
-      clean2(...toClean);
-      return out;
-    }
-  };
-});
-
-// node_modules/@cmdcode/nostr-p2p/dist/lib/crypto.js
-function get_pubkey3(seckey) {
-  const pbytes = schnorr.getPublicKey(seckey);
-  return new Buff(pbytes).hex;
-}
-function get_shared_secret(seckey, peer_pk) {
-  const pubkey2 = peer_pk.length === 66 ? peer_pk : "02" + peer_pk;
-  const sbytes = secp256k1.getSharedSecret(seckey, pubkey2, true);
-  return new Buff(sbytes).slice(1).hex;
-}
-function sign_msg2(seckey, message) {
-  const sig = schnorr.sign(message, seckey);
-  return new Buff(sig).hex;
-}
-function verify_sig(message, pubkey2, signature) {
-  return schnorr.verify(signature, message, pubkey2);
-}
-function encrypt_content(secret, content, iv) {
-  const cbytes = Buff.str(content);
-  const sbytes = Buff.hex(secret);
-  const vector = iv !== void 0 ? Buff.hex(iv, 24) : Buff.random(24);
-  const encrypted = gcm(sbytes, vector).encrypt(cbytes);
-  return new Buff(encrypted).b64url + "?iv=" + vector.b64url;
-}
-function decrypt_content(secret, content) {
-  const [encryped, iv] = content.split("?iv=");
-  const cbytes = Buff.b64url(encryped);
-  const sbytes = Buff.hex(secret);
-  const vector = Buff.b64url(iv);
-  const decrypted = gcm(sbytes, vector).decrypt(cbytes);
-  return new Buff(decrypted).str;
-}
-
-// node_modules/@cmdcode/nostr-p2p/dist/lib/util.js
-function gen_message_id() {
-  return Buff.random(16).hex;
-}
-function get_event_id(template3) {
-  const preimg = JSON.stringify([
-    0,
-    template3.pubkey,
-    template3.created_at,
-    template3.kind,
-    template3.tags,
-    template3.content
-  ]);
-  return Buff.str(preimg).digest.hex;
-}
-function get_tags(event, tag) {
-  return event.tags.filter((e) => e.at(0) === tag);
-}
-function is_recipient(event, pubkey2) {
-  const peers = get_tags(event, "p");
-  return peers.some((e) => e[1] === pubkey2);
-}
-
-// node_modules/@cmdcode/nostr-p2p/dist/schema/base.js
-var big2 = z.bigint();
-var bool2 = z.boolean();
-var date2 = z.date();
-var num3 = z.number();
-var uint2 = z.number().max(Number.MAX_SAFE_INTEGER);
-var str2 = z.string();
-var stamp2 = z.number().min(5e8).max(Number.MAX_SAFE_INTEGER);
-var url = z.string().url();
-var any2 = z.any();
-var hex2 = z.string().regex(/^[0-9a-fA-F]*$/).refine((e) => e.length % 2 === 0);
-var literal2 = z.union([z.string(), z.number(), z.boolean(), z.null()]);
-var hex16 = hex2.refine((e) => e.length === 32);
-var hex202 = hex2.refine((e) => e.length === 40);
-var hex322 = hex2.refine((e) => e.length === 64);
-var hex642 = hex2.refine((e) => e.length === 128);
-var pubkey = hex2.refine((e) => e.length === 66);
-var base583 = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]+$/);
-var base643 = z.string().regex(/^[a-zA-Z0-9+/]+={0,2}$/);
-var b64url = z.string().regex(/^[a-zA-Z0-9\-_]+={0,2}$/);
-var bech323 = z.string().regex(/^[a-z]+1[023456789acdefghjklmnpqrstuvwxyz]+$/);
-var base_default2 = {
-  any: any2,
-  base58: base583,
-  base64: base643,
-  b64url,
-  bech32: bech323,
-  big: big2,
-  bool: bool2,
-  date: date2,
-  hex32: hex322,
-  hex16,
-  hex20: hex202,
-  hex64: hex642,
-  hex: hex2,
-  literal: literal2,
-  num: num3,
-  pubkey,
-  str: str2,
-  stamp: stamp2,
-  uint: uint2,
-  url
-};
-
-// node_modules/@cmdcode/nostr-p2p/dist/schema/event.js
-var tags = base_default2.str.array();
-var template2 = z.object({
-  content: base_default2.str,
-  created_at: base_default2.stamp,
-  kind: base_default2.num,
-  pubkey: base_default2.hex32,
-  tags: tags.array()
-});
-var unsigned = template2.extend({
-  id: base_default2.hex32
-});
-var signed = unsigned.extend({
-  sig: base_default2.hex64
-});
-var event_default = { signed, tags, template: template2, unsigned };
-
-// node_modules/@cmdcode/nostr-p2p/dist/schema/msg.js
-var mid = base_default2.hex16;
-var payload = base_default2.str;
-var topic = base_default2.str.min(3).max(256);
-var envelope = z.tuple([topic, mid, payload]);
-var msg_default = { envelope };
-
-// node_modules/@cmdcode/nostr-p2p/dist/schema/index.js
-var schema_default2 = { base: base_default2, event: event_default, msg: msg_default };
-
-// node_modules/@cmdcode/nostr-p2p/dist/util/assert.js
-var Assert2;
-(function(Assert3) {
-  function ok2(value, message) {
-    if (value === false)
-      throw new Error(message != null ? message : "Assertion failed!");
-  }
-  Assert3.ok = ok2;
-  function exists5(input, err_msg) {
-    if (typeof input === "undefined") {
-      throw new TypeError(err_msg != null ? err_msg : "Input is undefined!");
-    }
-    if (input === null) {
-      throw new TypeError(err_msg != null ? err_msg : "Input is null!");
-    }
-  }
-  Assert3.exists = exists5;
-  function size2(input, size3, err_msg) {
-    const bytes4 = Buff.bytes(input);
-    if (bytes4.length !== size3) {
-      throw new Error(err_msg != null ? err_msg : "Invalid byte size: ".concat(bytes4.hex, " !== ").concat(size3));
-    }
-    return true;
-  }
-  Assert3.size = size2;
-})(Assert2 || (Assert2 = {}));
-
-// node_modules/@cmdcode/nostr-p2p/dist/util/helpers.js
-var now2 = () => Math.floor(Date.now() / 1e3);
-function parse_error2(err) {
-  if (err instanceof Error)
-    return err.message;
-  if (typeof err === "string")
-    return err;
-  return String(err);
-}
-
-// node_modules/@cmdcode/nostr-p2p/dist/lib/event.js
-function create_event(config, payload2, peer_pk, seckey) {
-  var _a;
-  const created_at = (_a = config.created_at) != null ? _a : now2();
-  const pubkey2 = get_pubkey3(seckey);
-  const secret = get_shared_secret(seckey, peer_pk);
-  const content = encrypt_content(secret, payload2);
-  const event = __spreadProps(__spreadValues({}, config), { pubkey: pubkey2, content, created_at });
-  event.tags.push(["p", peer_pk]);
-  return sign_event(seckey, event);
-}
-function sign_event(seckey, template3) {
-  const id = get_event_id(template3);
-  const sig = sign_msg2(seckey, id);
-  return __spreadProps(__spreadValues({}, template3), { id, sig });
-}
-function verify_event(event) {
-  const _a = event, { id, sig } = _a, template3 = __objRest(_a, ["id", "sig"]);
-  const schema = schema_default2.event.signed;
-  const parsed = schema.safeParse(event);
-  const vid = get_event_id(template3);
-  if (!parsed.success) {
-    return "event failed schema validation";
-  } else if (id !== vid) {
-    return "event id mismatch";
-  } else if (!verify_sig(id, event.pubkey, sig)) {
-    return "invalid event signature";
-  } else {
-    return null;
-  }
-}
-
-// node_modules/@cmdcode/nostr-p2p/dist/const.js
-var DEBUG = false;
-
-// node_modules/@cmdcode/nostr-p2p/dist/lib/message.js
-function decrypt_payload(event, seckey) {
-  const error = verify_event(event);
-  if (error !== null) {
-    throw new Error(error);
-  }
-  const pubkey2 = get_pubkey3(seckey);
-  if (!is_recipient(event, pubkey2)) {
-    throw new Error("pubkey not in peers list");
-  }
-  const secret = get_shared_secret(seckey, event.pubkey);
-  const content = decrypt_content(secret, event.content);
-  const payload2 = JSON.parse(content);
-  return payload2;
-}
-function finalize_message(template3) {
-  var _a;
-  const id = (_a = template3.id) != null ? _a : gen_message_id();
-  return __spreadProps(__spreadValues({}, template3), { id });
-}
-function create_payload(tag, data, id) {
-  try {
-    return JSON.stringify([tag, id, data]);
-  } catch (err) {
-    throw new Error("failed to create message payload");
-  }
-}
-function parse_envelope(envelope2, event) {
-  const schema = schema_default2.msg.envelope;
-  const parsed = schema.safeParse(envelope2);
-  if (!parsed.success) {
-    if (DEBUG)
-      console.log(parsed.error);
-    throw new Error("envelope failed schema validation");
-  }
-  const [tag, id, data] = parsed.data;
-  return { env: event, data, id, tag };
-}
-
-// node_modules/@cmdcode/nostr-p2p/dist/lib/validate.js
-function verify_relays(relays) {
-  const schema = schema_default2.base.url.array();
-  const parsed = schema.safeParse(relays);
-  if (!parsed.success) {
-    throw new Error("invalid relay set: " + relays);
-  }
-}
-function verify_seckey(seckey) {
-  const schema = schema_default2.base.hex32;
-  const parsed = schema.safeParse(seckey);
-  if (!parsed.success) {
-    throw new Error("invalid secret key: " + seckey);
-  } else {
-  }
-}
-
-// node_modules/@frostr/bifrost/dist/lib/parse.js
-function parse_ecdh_message(msg) {
-  try {
-    const schema = schema_default.pkg.ecdh;
-    const json2 = JSON.parse(msg.data);
-    const parsed = schema.parse(json2);
-    return __spreadProps(__spreadValues({}, msg), { data: parsed });
-  } catch (e) {
-    throw new Error("ecdh message failed validation");
-  }
-}
-function parse_session_message(msg) {
-  try {
-    const schema = schema_default.sign.session;
-    const json2 = JSON.parse(msg.data);
-    const parsed = schema.parse(json2);
-    return __spreadProps(__spreadValues({}, msg), { data: parsed });
-  } catch (e) {
-    throw new Error("session message failed validation");
-  }
-}
-function parse_psig_message(msg) {
-  try {
-    const schema = schema_default.sign.psig_pkg;
-    const json2 = JSON.parse(msg.data);
-    const parsed = schema.parse(json2);
-    return __spreadProps(__spreadValues({}, msg), { data: parsed });
-  } catch (err) {
-    console.log("error:", err);
-    throw new Error("signature message failed validation");
-  }
-}
-function parse_group_pkg(group_pkg) {
-  try {
-    const schema = schema_default.pkg.group;
-    return schema.parse(group_pkg);
-  } catch (err) {
-    console.log("error:", err);
-    throw new Error("group package failed validation");
-  }
-}
-function parse_share_pkg(share_pkg) {
-  try {
-    const schema = schema_default.pkg.share;
-    return schema.parse(share_pkg);
-  } catch (err) {
-    console.log("error:", err);
-    throw new Error("share package failed validation");
-  }
-}
-
-// node_modules/@frostr/bifrost/dist/api/ecdh.js
-async function ecdh_handler_api(node, msg) {
-  const middleware = node.config.middleware.ecdh;
-  try {
-    node.emit("/ecdh/handler/req", copy_obj(msg));
-    if (typeof middleware === "function") {
-      msg = middleware(node, msg);
-    }
-    const { members, ecdh_pk } = msg.data;
-    const pkg = node.signer.gen_ecdh_share(members, ecdh_pk);
-    const envelope2 = finalize_message({
-      data: JSON.stringify(pkg),
-      id: msg.id,
-      tag: "/ecdh/res"
-    });
-    const res = await node.client.publish(envelope2, msg.env.pubkey);
-    if (!res.ok)
-      throw new Error("failed to publish response");
-    node.emit("/ecdh/handler/res", copy_obj(res.data));
-  } catch (err) {
-    if (node.debug)
-      console.log(err);
-    node.emit("/ecdh/handler/rej", [parse_error(err), copy_obj(msg)]);
-  }
-}
-function ecdh_request_api(node) {
-  return async (ecdh_pk, peers) => {
-    const thold = node.group.threshold;
-    const selected = select_random_peers(peers != null ? peers : peers = node.peers.send, thold);
-    const encrypted = node.cache.ecdh.get(ecdh_pk);
-    if (encrypted !== void 0) {
-      return { ok: true, data: node.signer.unwrap(encrypted, ecdh_pk) };
-    }
-    const members = get_member_indexes(node.group, [node.pubkey, ...selected]);
-    const self_pkg = node.signer.gen_ecdh_share(members, ecdh_pk);
-    let msgs = null;
-    try {
-      msgs = await create_ecdh_request(node, selected, self_pkg);
-      node.emit("/ecdh/sender/res", copy_obj(msgs));
-    } catch (err) {
-      if (node.debug)
-        console.log(err);
-      const reason = parse_error(err);
-      node.emit("/ecdh/sender/rej", [reason, copy_obj(self_pkg)]);
-      return { ok: false, err: reason };
-    }
-    try {
-      Assert.ok(msgs !== null, "no responses from peers");
-      const pkgs = [self_pkg, ...msgs.map((e) => e.data)];
-      const secret = finalize_ecdh_response(pkgs);
-      const content = node.signer.wrap(secret, ecdh_pk);
-      node.cache.ecdh.set(ecdh_pk, content);
-      node.emit("/ecdh/sender/ret", [ecdh_pk, secret]);
-      return { ok: true, data: secret };
-    } catch (err) {
-      if (node.debug)
-        console.log(err);
-      const reason = parse_error(err);
-      node.emit("/ecdh/sender/err", [reason, copy_obj(msgs != null ? msgs : [])]);
-      return { ok: false, err: reason };
-    }
-  };
-}
-async function create_ecdh_request(node, peers, pkg) {
-  const msg = { data: JSON.stringify(pkg), tag: "/ecdh/req" };
-  const res = await node.client.multicast(msg, peers);
-  if (!res.sub.ok)
-    throw new Error(res.sub.reason);
-  return res.sub.inbox.map((e) => {
-    const parsed = parse_ecdh_message(e);
-    Assert.ok(parsed !== null, "invalid ecdh response from pubkey: " + e.env.pubkey);
-    return parsed;
-  });
-}
-function finalize_ecdh_response(pkgs) {
-  return combine_ecdh_pkgs(pkgs);
 }
 
 // node_modules/@frostr/bifrost/dist/api/sign.js
@@ -34278,7 +33839,7 @@ async function sign_handler_api(node, msg) {
   } catch (err) {
     if (node.debug)
       console.log(err);
-    node.emit("/sign/handler/rej", [parse_error(err), copy_obj(msg)]);
+    node.emit("/sign/handler/rej", [parse_error2(err), copy_obj(msg)]);
   }
 }
 function sign_queue_api(node) {
@@ -34296,7 +33857,7 @@ function sign_request_api(node) {
     const selected = select_random_peers(peers, thold);
     const members = get_member_indexes(node.group, [node.pubkey, ...selected]);
     const template3 = create_session_template(members, sigvecs, options);
-    Assert.ok(template3 !== null, "invalid session template");
+    Assert2.ok(template3 !== null, "invalid session template");
     const session2 = create_session_pkg(node.group, template3);
     let msgs = null;
     try {
@@ -34305,19 +33866,19 @@ function sign_request_api(node) {
     } catch (err) {
       if (node.debug)
         console.log(err);
-      const reason = parse_error(err);
+      const reason = parse_error2(err);
       node.emit("/sign/sender/rej", [reason, session2]);
       return { ok: false, err: reason };
     }
     try {
-      Assert.ok(msgs !== null, "no responses from peers");
+      Assert2.ok(msgs !== null, "no responses from peers");
       const sigs = finalize_sign_response(node, msgs, session2);
       node.emit("/sign/sender/ret", [session2.sid, sigs]);
       return { ok: true, data: sigs };
     } catch (err) {
       if (node.debug)
         console.log(err);
-      const reason = parse_error(err);
+      const reason = parse_error2(err);
       node.emit("/sign/sender/err", [reason, msgs != null ? msgs : []]);
       return { ok: false, err: reason };
     }
@@ -34338,11 +33899,23 @@ function finalize_sign_response(node, responses, session2) {
   responses.forEach((e) => {
     const parsed = parse_psig_message(e);
     const error = verify_psig_pkg(ctx, parsed.data);
-    Assert.ok(error === null, error + " : " + e.env.pubkey);
+    Assert2.ok(error === null, error + " : " + e.env.pubkey);
     pkgs.push(parsed.data);
   });
   return combine_signature_pkgs(ctx, pkgs);
 }
+
+// node_modules/@frostr/bifrost/dist/const.js
+var COMMIT_INDEX_SIZE = 4;
+var COMMIT_PUBKEY_SIZE = 33;
+var COMMIT_PNONCE_SIZE = 33;
+var COMMIT_DATA_SIZE = 103;
+var GROUP_PUBKEY_SIZE = 33;
+var GROUP_THOLD_SIZE = 4;
+var SHARE_DATA_SIZE = 100;
+var SHARE_INDEX_SIZE = 4;
+var SHARE_SECKEY_SIZE = 32;
+var SHARE_SNONCE_SIZE = 32;
 
 // node_modules/@frostr/bifrost/dist/class/emitter.js
 var EventEmitter = class {
@@ -34414,7 +33987,7 @@ var BifrostSigner = class {
     this._config = __spreadValues(__spreadValues({}, SIGNER_CONFIG()), options);
     this._group = parse_group_pkg(group2);
     this._share = parse_share_pkg(share2);
-    this._pubkey = get_pubkey(this._share.seckey, "bip340");
+    this._pubkey = get_pubkey3(this._share.seckey, "bip340");
   }
   get config() {
     return this._config;
@@ -41287,7 +40860,7 @@ var NODE_CONFIG = () => {
     },
     filter: {
       kinds: [20004],
-      since: now2()
+      since: now()
     },
     req_timeout: 5e3,
     since_offset: 5,
@@ -41313,7 +40886,7 @@ var NostrNode = class extends EventEmitter2 {
         this.inbox.peer.emit(msg.env.pubkey, msg);
         this.inbox.tag.emit(msg.tag, msg);
       } catch (err) {
-        this.emit("bounced", [event.id, parse_error2(err)]);
+        this.emit("bounced", [event.id, parse_error(err)]);
       }
     };
     this._publish = async (message, peer_pk, options2) => {
@@ -41338,7 +40911,7 @@ var NostrNode = class extends EventEmitter2 {
     verify_relays(relays);
     verify_seckey(seckey);
     this._seckey = new Buff(seckey);
-    this._pubkey = get_pubkey3(this._seckey.hex);
+    this._pubkey = get_pubkey(this._seckey.hex);
     this._config = get_node_config(options);
     this._filter = get_filter_config(this, options.filter);
     this._pool = new SimplePool();
@@ -41476,7 +41049,7 @@ function get_node_config(opt = {}) {
 }
 function get_event_config(node, opt = {}) {
   var _b, _c;
-  let _a = opt, { created_at = now2(), tags: tags2 = [] } = _a, rest = __objRest(_a, ["created_at", "tags"]);
+  let _a = opt, { created_at = now(), tags: tags2 = [] } = _a, rest = __objRest(_a, ["created_at", "tags"]);
   const envelope2 = node.config.envelope;
   tags2 = [...(_b = envelope2.tags) != null ? _b : [], ...(_c = opt.tags) != null ? _c : []];
   return __spreadProps(__spreadValues(__spreadValues({}, envelope2), rest), { created_at, tags: tags2 });
@@ -41516,6 +41089,10 @@ var BifrostNode = class extends EventEmitter {
         return;
       try {
         switch (msg.tag) {
+          case "/ping/req": {
+            ping_handler_api(this, msg);
+            break;
+          }
           case "/ecdh/req": {
             const parsed = parse_ecdh_message(msg);
             ecdh_handler_api(this, parsed);
@@ -41528,7 +41105,7 @@ var BifrostNode = class extends EventEmitter {
           }
         }
       } catch (err) {
-        this.emit("bounced", [parse_error2(err), msg]);
+        this.emit("bounced", [parse_error(err), msg]);
       }
     });
   }
@@ -41566,11 +41143,12 @@ var BifrostNode = class extends EventEmitter {
     };
   }
   get pubkey() {
-    return convert_pubkey(this.signer.pubkey, "bip340");
+    return convert_pubkey2(this.signer.pubkey, "bip340");
   }
   get req() {
     return {
       ecdh: ecdh_request_api(this),
+      ping: ping_request_api(this),
       queue: sign_queue_api(this),
       sign: sign_request_api(this)
     };
@@ -41600,7 +41178,7 @@ function get_node_cache(opt = {}) {
 }
 function get_peer_policies(node) {
   const pubkey2 = node.pubkey;
-  const peers = node.group.commits.map((e) => convert_pubkey(e.pubkey, "bip340")).filter((e) => e !== pubkey2);
+  const peers = node.group.commits.map((e) => convert_pubkey2(e.pubkey, "bip340")).filter((e) => e !== pubkey2);
   let policies = [];
   for (const peer of peers) {
     const config = node.config.policies.find((e) => e[0] === peer);
@@ -41609,60 +41187,520 @@ function get_peer_policies(node) {
   return policies;
 }
 
-// src/components/node/service.tsx
-var import_react5 = __toESM(require_react());
-var import_jsx_runtime7 = __toESM(require_jsx_runtime());
-function NodeService({ store }) {
-  const [node, setNode] = (0, import_react5.useState)(null);
-  (0, import_react5.useEffect)(() => {
-    const unsubscribe = store.subscribe(() => {
-      const node2 = init_node(store);
-      setNode(node2);
+// node_modules/@frostr/bifrost/dist/encoder/group.js
+function encode_group_pkg(pkg) {
+  const data = serialize_group_data(pkg);
+  return data.to_bech32m("bfgroup");
+}
+function decode_group_pkg(str3) {
+  const data = Buff.bech32m(str3);
+  return deserialize_group_data(data);
+}
+function serialize_group_data(pkg) {
+  const thd = Buff.num(pkg.threshold, GROUP_THOLD_SIZE);
+  const gpk = Buff.hex(pkg.group_pk, GROUP_PUBKEY_SIZE);
+  const com = pkg.commits.map((e) => serialize_commit_data(e));
+  return Buff.join([gpk, thd, ...com]);
+}
+function deserialize_group_data(data) {
+  const stream = new Buff(data).stream;
+  const group_pk = stream.read(COMMIT_PUBKEY_SIZE).hex;
+  const threshold = stream.read(GROUP_THOLD_SIZE).num;
+  Assert2.ok(stream.size % COMMIT_DATA_SIZE === 0, "commit data is malformed");
+  const count = stream.size / COMMIT_DATA_SIZE;
+  const commits = [];
+  for (let i2 = 0; i2 < count; i2++) {
+    const cbytes = stream.read(COMMIT_DATA_SIZE);
+    commits.push(deserialize_commit_data(cbytes));
+  }
+  Assert2.size(stream.data, 0);
+  return normalize_obj({ commits, group_pk, threshold });
+}
+function serialize_commit_data(pkg) {
+  const idx = Buff.num(pkg.idx, COMMIT_INDEX_SIZE);
+  const spk = Buff.hex(pkg.pubkey, COMMIT_PUBKEY_SIZE);
+  const bpn = Buff.hex(pkg.binder_pn, COMMIT_PNONCE_SIZE);
+  const hpn = Buff.hex(pkg.hidden_pn, COMMIT_PNONCE_SIZE);
+  return Buff.join([idx, spk, bpn, hpn]);
+}
+function deserialize_commit_data(data) {
+  const stream = new Buff(data).stream;
+  Assert2.size(stream.data, COMMIT_DATA_SIZE);
+  const idx = stream.read(COMMIT_INDEX_SIZE).num;
+  const pubkey2 = stream.read(COMMIT_PUBKEY_SIZE).hex;
+  const binder_pn = stream.read(COMMIT_PNONCE_SIZE).hex;
+  const hidden_pn = stream.read(COMMIT_PNONCE_SIZE).hex;
+  Assert2.size(stream.data, 0);
+  return { idx, binder_pn, hidden_pn, pubkey: pubkey2 };
+}
+
+// node_modules/@frostr/bifrost/dist/encoder/share.js
+function encode_share_pkg(pkg) {
+  const data = serialize_share_data(pkg);
+  Assert2.size(data, SHARE_DATA_SIZE);
+  return data.to_bech32m("bfshare");
+}
+function decode_share_pkg(sharestr) {
+  const data = Buff.bech32m(sharestr);
+  return deserialize_share_data(data);
+}
+function serialize_share_data(pkg) {
+  const idx = Buff.num(pkg.idx, SHARE_INDEX_SIZE);
+  const ssk = Buff.hex(pkg.seckey, SHARE_SECKEY_SIZE);
+  const bsn = Buff.hex(pkg.binder_sn, SHARE_SNONCE_SIZE);
+  const hsn = Buff.hex(pkg.hidden_sn, SHARE_SNONCE_SIZE);
+  return Buff.join([idx, ssk, bsn, hsn]);
+}
+function deserialize_share_data(data) {
+  const stream = new Buff(data).stream;
+  Assert2.size(stream.data, SHARE_DATA_SIZE);
+  const idx = stream.read(SHARE_INDEX_SIZE).num;
+  const seckey = stream.read(SHARE_SECKEY_SIZE).hex;
+  const binder_sn = stream.read(SHARE_SNONCE_SIZE).hex;
+  const hidden_sn = stream.read(SHARE_SNONCE_SIZE).hex;
+  Assert2.size(stream.data, 0);
+  return normalize_obj({ idx, binder_sn, hidden_sn, seckey });
+}
+
+// node_modules/@frostr/bifrost/dist/encoder/cred.js
+var SPLIT_IDX = SHARE_DATA_SIZE;
+function encode_credentials(group_pkg, share_pkg) {
+  Assert2.ok(is_group_member(group_pkg, share_pkg), "share not included in group");
+  const group2 = serialize_group_data(group_pkg);
+  const share2 = serialize_share_data(share_pkg);
+  const cred = Buff.join([share2, group2]);
+  return cred.to_bech32m("bfcred");
+}
+function decode_credentials(credstr) {
+  const bytes4 = Buff.bech32m(credstr);
+  const sdata = bytes4.slice(0, SPLIT_IDX);
+  const gdata = bytes4.slice(SPLIT_IDX);
+  const group2 = deserialize_group_data(gdata);
+  const share2 = deserialize_share_data(sdata);
+  Assert2.ok(is_group_member(group2, share2), "share not included in group");
+  return { group: group2, share: share2 };
+}
+
+// node_modules/@frostr/bifrost/dist/encoder/index.js
+var PackageEncoder;
+(function(PackageEncoder2) {
+  PackageEncoder2.cred = {
+    encode: encode_credentials,
+    decode: decode_credentials
+  };
+  PackageEncoder2.group = {
+    encode: encode_group_pkg,
+    decode: decode_group_pkg,
+    serialize: serialize_group_data,
+    deserialize: deserialize_group_data
+  };
+  PackageEncoder2.share = {
+    encode: encode_share_pkg,
+    decode: decode_share_pkg,
+    serialize: serialize_share_data,
+    deserialize: deserialize_share_data
+  };
+})(PackageEncoder || (PackageEncoder = {}));
+
+// src/hooks/useBifrost.ts
+var import_react2 = __toESM(require_react());
+function useBifrost() {
+  const [status, setStatus] = (0, import_react2.useState)("stopped");
+  const store = useStore();
+  const ref = (0, import_react2.useRef)(null);
+  const reset = () => {
+    if (!is_store_ready(store.data)) return;
+    const { creds, relays, peers } = store.data;
+    const urls = relays.map((r) => r.url);
+    ref.current = new BifrostNode(creds.group, creds.share, urls, { policies: peers });
+    ref.current.once("ready", () => {
+      console.log("node ready");
+      setStatus("online");
     });
-    return () => unsubscribe();
-  }, [store]);
-  return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "node-container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h2", { className: "section-header", children: "Bifrost Node" }),
-    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "description", children: "Bifrost Node Service" }),
-    /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("p", { children: [
+    ref.current.once("error", (error) => {
+      console.error("node error:", error);
+      setStatus("offline");
+    });
+    ref.current.on("closed", () => {
+      console.log("node closed");
+      setStatus("offline");
+    });
+  };
+  const stop = () => {
+    if (!ref.current) return;
+    ref.current = null;
+  };
+  (0, import_react2.useEffect)(() => {
+    reset();
+  }, [store.data.creds, store.data.relays, store.data.peers]);
+  return { ref, reset, stop, status };
+}
+function is_store_ready(store) {
+  return store.creds !== null && store.relays.length > 0;
+}
+
+// src/components/node/dash.tsx
+var import_jsx_runtime3 = __toESM(require_jsx_runtime());
+function Dashboard() {
+  const node = useBifrost();
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "node-container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h2", { className: "section-header", children: "Bifrost Node" }),
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "description", children: "Bifrost Node Service" }),
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { children: [
       "Status ",
-      node == null ? void 0 : node.pubkey
+      node.status
     ] })
   ] });
 }
-function init_node(store) {
-  const { group: group2, share: share2, relays } = store.get();
-  if (group2 !== null && share2 !== null && relays.length > 0) {
-    const urls = relays.map((e) => e.url);
-    const peers = group2.commits.map((e) => [e.pubkey, false, false]);
-    store.update({ peers });
-    const node = new BifrostNode(group2, share2, urls, { policies: peers });
-    node.once("ready", () => {
-      console.log("node ready");
-    });
-    node.once("error", (error) => {
-      console.error("node error:", error);
-    });
-    return node;
+
+// src/components/settings/creds.tsx
+var import_react3 = __toESM(require_react());
+var import_jsx_runtime4 = __toESM(require_jsx_runtime());
+function CredentialsConfig() {
+  var _a;
+  const store = useStore();
+  const [input, setInput] = (0, import_react3.useState)("");
+  const [error, setError] = (0, import_react3.useState)(null);
+  const [show, setShow] = (0, import_react3.useState)(false);
+  const [saved, setSaved] = (0, import_react3.useState)(false);
+  const update_creds = () => {
+    if (error !== null) return;
+    if (input === "") {
+      store.update({ creds: null });
+    } else {
+      try {
+        const creds = decode_credentials(input);
+        if (creds === null) return;
+        store.update({ creds });
+      } catch (err) {
+        console.log(err);
+        setError("failed to decode package data");
+      }
+    }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  };
+  (0, import_react3.useEffect)(() => {
+    if (input === "") {
+      setError(null);
+    } else if (!input.startsWith("bfcred")) {
+      setError('input must start with "bfcred"');
+    } else if (!is_cred_string(input)) {
+      setError("input contains invalid characters");
+    } else {
+      const pkg = get_creds_pkg(input);
+      if (pkg !== null) {
+        setError(null);
+      } else {
+        setError("failed to decode package data");
+      }
+    }
+  }, [input]);
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h2", { className: "section-header", children: "Credentials Package" }),
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "description", children: "Paste your encoded credentials string (starts with bfcred). It contains your secrets, plus information about your signing group." }),
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "content-container", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "input-with-button", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          "input",
+          {
+            type: show ? "text" : "password",
+            value: input,
+            onChange: (e) => setInput(e.target.value.trim()),
+            placeholder: "bfcred1..."
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "input-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            "button",
+            {
+              className: "button",
+              onClick: () => setShow(!show),
+              children: show ? "hide" : "show"
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            "button",
+            {
+              className: "button action-button ".concat(saved ? "saved-button" : ""),
+              onClick: update_creds,
+              disabled: !is_creds_changed(input, store.data.creds) || error !== null,
+              children: saved ? "Saved" : "Save"
+            }
+          )
+        ] })
+      ] }),
+      input !== "" && error === null && show && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("pre", { className: "code-display", children: (_a = get_creds_json(input)) != null ? _a : "invalid group package" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "notification-container", children: error && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "error-text", children: error }) })
+    ] })
+  ] });
+}
+function is_cred_string(input) {
+  return /^bfcred1[023456789acdefghjklmnpqrstuvwxyz]+$/.test(input);
+}
+function is_creds_changed(input, creds) {
+  if (creds === null) {
+    return input !== "";
   } else {
+    const creds_str = get_creds_str(creds);
+    return input !== creds_str;
+  }
+}
+function get_creds_str(creds) {
+  try {
+    return creds !== null ? encode_credentials(creds.group, creds.share) : "";
+  } catch (e) {
+    return "";
+  }
+}
+function get_creds_pkg(input) {
+  try {
+    return input !== "" ? decode_credentials(input) : null;
+  } catch (e) {
+    return null;
+  }
+}
+function get_creds_json(input) {
+  try {
+    const creds = decode_credentials(input);
+    return JSON.stringify(creds, null, 2);
+  } catch (err) {
     return null;
   }
 }
 
+// src/components/settings/peers.tsx
+var import_react4 = __toESM(require_react());
+var import_jsx_runtime5 = __toESM(require_jsx_runtime());
+function PeerConfig() {
+  const store = useStore();
+  const [peers, setPeers] = (0, import_react4.useState)(store.data.peers);
+  const [changes, setChanges] = (0, import_react4.useState)(false);
+  const [saved, setSaved] = (0, import_react4.useState)(false);
+  const update = () => {
+    store.update({ peers });
+    setChanges(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  };
+  const cancel = () => {
+    setPeers(store.data.peers);
+    setChanges(false);
+  };
+  const update_peer = (idx, key, value) => {
+    setPeers((prev) => {
+      const updated = [...prev != null ? prev : []];
+      updated[idx][key] = value;
+      return updated;
+    });
+    setChanges(true);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { className: "section-header", children: "Peer Connections" }),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "description", children: 'Configure how you communicate with other peers in your signing group. "Request" will send signature requests to that peer, and "Respond" will co-sign requests from that peer.' }),
+    peers === null && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "description", children: "You must configure your node's credentials first." }),
+    peers !== null && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("table", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("th", { children: "Peer Public Key" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("th", { className: "checkbox-cell", children: "Request" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("th", { className: "checkbox-cell", children: "Respond" })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("tbody", { children: peers.map((peer, idx) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "pubkey-cell", children: peer[0] }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            "input",
+            {
+              type: "checkbox",
+              className: "peer-checkbox",
+              checked: peer[1],
+              onChange: () => update_peer(idx, 1, !peer[1])
+            }
+          ) }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            "input",
+            {
+              type: "checkbox",
+              className: "peer-checkbox",
+              checked: peer[2],
+              onChange: () => update_peer(idx, 2, !peer[2])
+            }
+          ) })
+        ] }, idx)) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "action-buttons", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          "button",
+          {
+            onClick: update,
+            disabled: !changes,
+            className: "button button-primary action-button ".concat(saved ? "saved-button" : ""),
+            children: saved ? "Saved" : "Save"
+          }
+        ),
+        changes && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          "button",
+          {
+            onClick: cancel,
+            className: "button",
+            children: "Cancel"
+          }
+        )
+      ] })
+    ] })
+  ] });
+}
+
+// src/components/settings/relays.tsx
+var import_react5 = __toESM(require_react());
+var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+function RelayConfig() {
+  const store = useStore();
+  const [relays, setRelays] = (0, import_react5.useState)(store.data.relays);
+  const [relayUrl, setUrl] = (0, import_react5.useState)("");
+  const [changes, setChanges] = (0, import_react5.useState)(false);
+  const [error, setError] = (0, import_react5.useState)(null);
+  const [saved, setSaved] = (0, import_react5.useState)(false);
+  const update = () => {
+    store.update({ relays });
+    setChanges(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  };
+  const cancel = () => {
+    setRelays(store.data.relays);
+    setChanges(false);
+  };
+  const update_relay = (idx, key) => {
+    setRelays((prev) => {
+      const updated = [...prev];
+      updated[idx][key] = !updated[idx][key];
+      return updated;
+    });
+    setChanges(true);
+  };
+  const add_relay = () => {
+    if (!relayUrl.trim()) return;
+    if (!(relayUrl.startsWith("wss://") || relayUrl.startsWith("ws://"))) {
+      setError("Relay URL must start with wss:// or ws://");
+    } else if (!validateUrl(relayUrl)) {
+      setError("Invalid URL format");
+    } else if (relays.some((relay) => relay.url === relayUrl)) {
+      setError("Relay already exists");
+    } else {
+      setRelays((prev) => [...prev, { url: relayUrl, read: true, write: true }]);
+      setUrl("");
+      setChanges(true);
+    }
+  };
+  const remove_relay = (idx) => {
+    setRelays((prev) => prev.filter((_, i2) => i2 !== idx));
+    setChanges(true);
+  };
+  (0, import_react5.useEffect)(() => {
+    if (error !== null) setError(null);
+  }, [relayUrl]);
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h2", { className: "section-header", children: "Relay Connections" }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { className: "description", children: 'Configure which relays your node will use to communicate. "Read" will enable listening for inbound requests, and "Write" will enable publishing outbound requests.' }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("th", { className: "url-column", children: "Relay URL" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("th", { className: "checkbox-cell", children: "Read" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("th", { className: "checkbox-cell", children: "Write" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("th", { className: "action-cell", children: "Actions" })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("tbody", { children: relays.map((relay, idx) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("td", { children: relay.url }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          "input",
+          {
+            type: "checkbox",
+            className: "relay-checkbox",
+            checked: relay.read,
+            onChange: () => update_relay(idx, "read")
+          }
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          "input",
+          {
+            type: "checkbox",
+            className: "relay-checkbox",
+            checked: relay.write,
+            onChange: () => update_relay(idx, "write")
+          }
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("td", { className: "action-cell", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          "button",
+          {
+            onClick: () => remove_relay(idx),
+            className: "button button-remove",
+            children: "Remove"
+          }
+        ) })
+      ] }, idx)) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "input-group relay-controls", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        "input",
+        {
+          type: "text",
+          value: relayUrl,
+          onChange: (e) => setUrl(e.target.value),
+          placeholder: "wss://relay.example.com",
+          className: "relay-input"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { onClick: add_relay, className: "button add-relay-button", children: "Add Relay" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "action-buttons", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        "button",
+        {
+          onClick: update,
+          disabled: !changes,
+          className: "button button-primary action-button ".concat(saved ? "saved-button" : ""),
+          children: saved ? "Saved" : "Save"
+        }
+      ),
+      changes && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        "button",
+        {
+          onClick: cancel,
+          className: "button",
+          children: "Cancel"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "notification-container", children: error && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { className: "error-text", children: error }) })
+    ] })
+  ] });
+}
+function validateUrl(url2) {
+  try {
+    new URL(url2);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// src/components/settings/index.tsx
+var import_jsx_runtime7 = __toESM(require_jsx_runtime());
+function Settings() {
+  return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(import_jsx_runtime7.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(CredentialsConfig, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(PeerConfig, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(RelayConfig, {})
+  ] });
+}
+
 // src/components/app.tsx
 var import_jsx_runtime8 = __toESM(require_jsx_runtime());
-var DEFAULT_STORE = {
-  group: null,
-  share: null,
-  relays: [],
-  peers: []
-};
 function App() {
-  const store = new Store("frostr-web", DEFAULT_STORE);
   return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "app", children: [
     /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Header, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(settings_default, { store }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(NodeService, { store })
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Dashboard, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Settings, {})
   ] });
 }
 
@@ -41690,7 +41728,7 @@ var container = document.getElementById("root");
 if (!container) throw new Error("[ app ] root container not found");
 var root = (0, import_client3.createRoot)(container);
 root.render(
-  /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(import_react6.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(App, {}) })
+  /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(import_react6.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(StoreProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(App, {}) }) })
 );
 /*! Bundled license information:
 

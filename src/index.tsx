@@ -1,7 +1,7 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-
-import App from './components/app.js'
+import { StrictMode }    from 'react'
+import { createRoot }    from 'react-dom/client'
+import { StoreProvider } from '@/store/index.js'
+import { App }           from '@/components/app.js'
 
 import '@/styles/global.css'
 import '@/styles/connected.css'
@@ -19,6 +19,8 @@ const root = createRoot(container)
 // Render the app.
 root.render(
   <StrictMode>
-    <App />
+    <StoreProvider>
+      <App />
+    </StoreProvider>
   </StrictMode>
 )

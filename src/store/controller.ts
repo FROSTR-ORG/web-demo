@@ -1,6 +1,6 @@
 type Subscriber = () => void
 
-export class Store<T> {
+export class DBController<T> {
   private readonly _defaults  : T
   private readonly _store_key : string
   private readonly _subs      : Set<Subscriber> = new Set()
@@ -11,6 +11,10 @@ export class Store<T> {
   ) {
     this._defaults  = defaults
     this._store_key = store_key
+  }
+
+  get_defaults () : T {
+    return this._defaults
   }
 
   get () : T {

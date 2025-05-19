@@ -1,17 +1,13 @@
-import GroupPackageConfig    from './group.js'
-import PeerNodeConfig        from './peers.js'
-import RelayConfig           from './relays.js'
-import SecretPackageConfig   from './share.js'
+import { CredentialsConfig } from './creds.js'
+import { PeerConfig }        from './peers.js'
+import { RelayConfig }       from './relays.js'
 
-import { StoreParams } from '@/types/index.js'
-
-export default function ({ store } : StoreParams) {
+export function Settings () {
   return (
     <>
-      <SecretPackageConfig store={store} />
-      <GroupPackageConfig  store={store} />
-      <PeerNodeConfig      store={store} />
-      <RelayConfig         store={store} />
+      <CredentialsConfig />
+      <PeerConfig        />
+      <RelayConfig       />
     </>
   )
 }

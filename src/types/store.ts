@@ -1,24 +1,25 @@
-import type { Store } from '@/class/store.js'
+import type {
+  LogEntry,
+  NodeCredentials,
+  RelayPolicy
+} from '@/types/node.js'
 
 import type {
-  GroupPackage,
-  SharePackage,
   PeerPolicy
 } from '@frostr/bifrost'
 
-export interface AppStore {
-  group  : GroupPackage  | null
-  share  : SharePackage  | null
+export type AppStore = StoreInit | StoreReady
+
+export interface BaseStore {
   relays : RelayPolicy[]
   peers  : PeerPolicy[]
+  logs   : LogEntry[]
 }
 
-export interface StoreParams {
-  store : Store<AppStore>
+export interface StoreInit extends BaseStore {
+  creds : null
 }
 
-export interface RelayPolicy {
-  url   : string
-  read  : boolean
-  write : boolean
+export interface StoreReady extends BaseStore {
+  creds : NodeCredentials
 }

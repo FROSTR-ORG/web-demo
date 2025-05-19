@@ -1,17 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useStore } from '@/store/index.js'
 
-import type { StoreParams } from '@/types/index.js'
-import type { PeerPolicy }  from '@frostr/bifrost'
+import type { PeerPolicy } from '@frostr/bifrost'
 
-export default function ({ store } : StoreParams) {
-  const [ peers, setPeers ]     = useState<PeerPolicy[]>(store.get().peers)
+export function PeerConfig() {
+  const store = useStore()
+
+  const [ peers, setPeers ]     = useState<PeerPolicy[]>(store.data.peers)
   const [ changes, setChanges ] = useState<boolean>(false)
   const [ saved, setSaved ]     = useState<boolean>(false)
 
   // Update the peer policies in the store.
   const update = () => {
-    // TODO: PWA storage update
-    // NodeStore.update({ peers })
+    store.update({ peers })
     setChanges(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 1500)
@@ -19,7 +20,7 @@ export default function ({ store } : StoreParams) {
 
   // Discard changes by resetting local state from store
   const cancel = () => {
-    setPeers(store.get().peers)
+    setPeers(store.data.peers)
     setChanges(false)
   }
 
@@ -32,14 +33,6 @@ export default function ({ store } : StoreParams) {
     })
     setChanges(true)
   }
-
-  useEffect(() => {
-    // Subscribe to store changes
-    const unsubscribe = store.subscribe(() => {
-      setPeers(store.get().peers)
-    })
-    return () => unsubscribe()
-  }, [ store ])
 
   return (
     <div className="container">
