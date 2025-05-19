@@ -6,10 +6,10 @@
 /* ========================================================================= */
 /* Console Component */
 .console-container {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%; /* Occupy full width of parent (.tab-panel) */
+  margin: 0; /* Removed auto margin, parent centers */
+  padding: 0; /* Remove padding, handled by .tab-panel or specific elements within */
+  box-sizing: border-box;
 }
 
 .console-output {
@@ -17,7 +17,7 @@
   border: 1px solid rgba(100, 140, 210, 0.3);
   border-radius: 4px;
   padding: 15px;
-  margin: 15px 0;
+  margin: 15px 0; /* Keep vertical margin */
   max-height: 400px;
   overflow-y: auto;
   font-family: monospace;
@@ -40,6 +40,7 @@
 .console-message {
   flex: 1;
   word-break: break-word;
+  overflow-wrap: break-word; /* Added for better wrapping */
 }
 
 .console-info {
@@ -72,10 +73,16 @@
 
 /* Dashboard Component */
 .dashboard-container {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%; /* Occupy full width of parent (.tab-panel) */
+  margin: 0; /* Removed auto margin, parent centers */
+  padding: 0; /* Remove padding, handled by .tab-panel or specific elements within */
+  box-sizing: border-box;
+}
+
+.dashboard-container pre {
+  white-space: pre-wrap; /* Allow wrapping for pre tags */
+  word-break: break-all;   /* Break long words if necessary */
+  overflow-wrap: break-word;
 }
 
 .dashboard-grid {
@@ -138,4 +145,31 @@
 .status-text {
   font-size: 14px;
   color: #e6e6e6;
+}
+
+/* Add media query for smaller screens */
+@media (max-width: 720px) {
+  .console-container,
+  .dashboard-container {
+    /* padding: 15px 10px; Removed, parent handles padding */
+  }
+
+  .console-controls {
+    justify-content: center; /* Center the button */
+  }
+
+  .console-controls .button,
+  .dashboard-container .button {
+    width: 100%; /* Make buttons full-width */
+    margin-top: 10px;
+  }
+
+  .console-entry {
+    flex-direction: column; /* Stack timestamp and message */
+    gap: 4px;
+  }
+
+  .console-timestamp {
+    font-size: 0.8em;
+  }
 } 

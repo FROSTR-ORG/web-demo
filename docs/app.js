@@ -41422,7 +41422,7 @@ var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
 function Dashboard() {
   var _a;
   const node = useNode();
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "node-container", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "dashboard-container", children: [
     /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { className: "section-header", children: "Node Manager" }),
     /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("pre", { children: [
       "pubkey: ",
@@ -42386,25 +42386,25 @@ function App() {
   ] });
 }
 
-// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/global.css
+// css-ns:/Users/plebdev/Desktop/code/web-demo/src/styles/global.css
 var link = document.createElement("link");
 link.rel = "stylesheet";
 link.href = "styles/global.css";
 document.head.appendChild(link);
 
-// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/layout.css
+// css-ns:/Users/plebdev/Desktop/code/web-demo/src/styles/layout.css
 var link2 = document.createElement("link");
 link2.rel = "stylesheet";
 link2.href = "styles/layout.css";
 document.head.appendChild(link2);
 
-// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/node.css
+// css-ns:/Users/plebdev/Desktop/code/web-demo/src/styles/node.css
 var link3 = document.createElement("link");
 link3.rel = "stylesheet";
 link3.href = "styles/node.css";
 document.head.appendChild(link3);
 
-// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/settings.css
+// css-ns:/Users/plebdev/Desktop/code/web-demo/src/styles/settings.css
 var link4 = document.createElement("link");
 link4.rel = "stylesheet";
 link4.href = "styles/settings.css";
