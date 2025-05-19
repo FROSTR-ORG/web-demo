@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStore } from '@/store/index.js'
 
 import type { PeerPolicy } from '@frostr/bifrost'
@@ -33,6 +33,10 @@ export function PeerConfig() {
     })
     setChanges(true)
   }
+
+  useEffect(() => {
+    setPeers(store.data.peers)
+  }, [ store.data.peers ])
 
   return (
     <div className="container">

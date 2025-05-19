@@ -150,9 +150,6 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
 .m-2 { margin: 1rem; }
 .m-3 { margin: 1.5rem; }
 .w-100 { width: 100%; }
-.w-75 { width: 75%; }
-.w-50 { width: 50%; }
-.w-25 { width: 25%; }
 
 .status-ok { color: #00b894; }
 .status-warning { color: #fdcb6e; }
@@ -169,16 +166,7 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
 .divider { height: 1px; background: rgba(255, 255, 255, 0.1); margin: 15px 0; }
 .fade { opacity: 0.7; }
 
-.alert { padding: 10px 15px; border-radius: 4px; margin-bottom: 15px; }
-.alert-info { background: rgba(52, 152, 219, 0.2); border: 1px solid rgba(52, 152, 219, 0.3); }
-.alert-warning { background: rgba(243, 156, 18, 0.2); border: 1px solid rgba(243, 156, 18, 0.3); }
-.alert-error { background: rgba(231, 76, 60, 0.2); border: 1px solid rgba(231, 76, 60, 0.3); }
-.alert-success { background: rgba(46, 204, 113, 0.2); border: 1px solid rgba(46, 204, 113, 0.3); }
-
 /* Icon and Navigation Alignment Fix */
-/* Remove the problematic code first */
-
-/* Add a targeted icon alignment fix that works with the existing structure */
 .tab-button,
 .button {
   display: inline-flex;
@@ -186,7 +174,6 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
   gap: 6px;
 }
 
-/* Ensure SVG icons align properly with text */
 .tab-button svg,
 .button svg {
   flex-shrink: 0;
@@ -194,20 +181,17 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
   top: 0;
 }
 
-/* Fix alignment in tabs navigation */
 .tabs-navigation {
   display: flex;
   align-items: center;
 }
 
-/* Ensure tabs have proper alignment */
 .tab-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
-/* Make sure button text is properly aligned */
 .button span,
 .tab-button span {
   display: inline-block;
@@ -216,7 +200,6 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
 
 /* Responsive Navigation for Options page */
 @media (max-width: 720px) {
-  /* Make tabs stack vertically (icon above text) */
   .tabs-navigation {
     width: 100%;
     justify-content: center;
@@ -243,20 +226,9 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
     width: 100%;
   }
   
-  /* Center the tabs in the navigation bar */
   .tabs-nav-wrapper {
     display: flex;
     justify-content: center;
-  }
-  
-  /* Add more room for the stacked text */
-  .tabs-container {
-    padding-bottom: 10px;
-  }
-  
-  /* Ensure the content adjusts properly */
-  .tab-content {
-    padding-top: 10px;
   }
 }
 

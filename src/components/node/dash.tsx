@@ -1,13 +1,14 @@
-import { useBifrost } from '@/hooks/useBifrost.js'
+import { useNode } from '@/context/node.js'
 
 export function Dashboard () {
-  const node = useBifrost()
+  const node = useNode()
 
   return (
     <div className="node-container">
-      <h2 className="section-header">Bifrost Node</h2>
-      <p className="description">Bifrost Node Service</p>
-      <p>Status {node.status}</p>
+      <h2 className="section-header">Node Manager</h2>
+      <pre>pubkey: {node.ref.current?.pubkey || 'unknown'}</pre>
+      <pre>status: {node.status}</pre>
+      <button className="button" onClick={() => node.reset()}>Reset Node</button>
     </div>
   )
 }

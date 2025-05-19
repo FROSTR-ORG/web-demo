@@ -1,11 +1,13 @@
 import { StrictMode }    from 'react'
 import { createRoot }    from 'react-dom/client'
+import { NodeProvider }  from '@/context/node.js'
 import { StoreProvider } from '@/store/index.js'
-import { App }           from '@/components/app.js'
+import { App }           from '@/components/layout/app.js'
 
 import '@/styles/global.css'
-import '@/styles/connected.css'
-import '@/styles/options.css'
+import '@/styles/layout.css'
+import '@/styles/node.css'
+import '@/styles/settings.css'
 
 // Fetch the root container.
 const container = document.getElementById('root')
@@ -20,7 +22,9 @@ const root = createRoot(container)
 root.render(
   <StrictMode>
     <StoreProvider>
-      <App />
+      <NodeProvider>
+        <App />
+      </NodeProvider>
     </StoreProvider>
   </StrictMode>
 )

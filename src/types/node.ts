@@ -1,6 +1,20 @@
-import { GroupPackage, SharePackage } from '@frostr/bifrost'
+import type {
+  BifrostNode,
+  GroupPackage,
+  SharePackage
+} from '@frostr/bifrost'
 
+import type { MutableRefObject } from 'react'
+
+export type LogType    = 'info' | 'error' | 'warning' | 'success'
 export type NodeStatus = 'stopped' | 'online' | 'offline'
+
+export interface NodeAPI {
+  ref    : MutableRefObject<BifrostNode | null>
+  reset  : () => void
+  stop   : () => void
+  status : NodeStatus
+}
 
 export interface NodeCredentials {
   group : GroupPackage
@@ -10,7 +24,7 @@ export interface NodeCredentials {
 export interface LogEntry {
   timestamp : string
   message   : string
-  type      : 'info' | 'error' | 'warning' | 'success'
+  type      : LogType
 }
 
 export interface RelayPolicy {

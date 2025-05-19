@@ -4,7 +4,9 @@
   "description": "FROSTR Web Demo",
   "scripts": {
     "build": "tsx scripts/build.ts",
-    "dev": "tsx scripts/dev.ts"
+    "dev": "tsx scripts/dev.ts",
+    "keygen": "tsx scripts/keygen.ts",
+    "relay": "tsx scripts/relay.ts"
   },
   "keywords": [
     "frostr",
@@ -21,10 +23,12 @@
     "@types/node": "^22.15.18",
     "@types/react": "^18.3.21",
     "@types/react-dom": "^18.2.19",
+    "@types/ws": "^8.18.1",
     "concurrently": "^8.2.2",
     "esbuild": "^0.25.4",
     "serve": "^14.2.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "ws": "^8.18.2"
   }
 }

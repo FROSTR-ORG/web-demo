@@ -30,8 +30,11 @@ export function RelayConfig() {
   // Update relay enabled status locally
   const update_relay = (idx: number, key: 'read' | 'write') => {
     setRelays(prev => {
-      const updated = [...prev]
-      updated[idx][key] = !updated[idx][key]
+      const updated = [ ...prev ]
+      updated[idx] = {
+        ...updated[idx],
+        [key]: !updated[idx][key]
+      }
       return updated
     })
     setChanges(true)
@@ -63,6 +66,10 @@ export function RelayConfig() {
   useEffect(() => {
     if (error !== null) setError(null)
   }, [ relayUrl ])
+
+  useEffect(() => {
+    setRelays(store.data.relays)
+  }, [ store.data.relays ])
   
   return (
     <div className="container">

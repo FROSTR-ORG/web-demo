@@ -4,5 +4,12 @@ import { createStoreProvider }      from './context.js'
 
 import type { AppStore } from '@/types/index.js'
 
-export const StoreDB = new DBController<AppStore>(STORE_KEY, DEFAULT_STORE)
+const params = new URLSearchParams(window.location.search)
+const name   = params.get('name')
+
+const store_key = name ?
+  `${STORE_KEY}-${name}`
+  : STORE_KEY
+
+export const StoreDB = new DBController<AppStore>(store_key, DEFAULT_STORE)
 export const { StoreProvider, useStore } = createStoreProvider(StoreDB)

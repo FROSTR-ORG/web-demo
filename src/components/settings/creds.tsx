@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { get_pubkey }          from '@frostr/bifrost/util'
 import { useStore }            from '@/store/index.js'
 
 import {
@@ -6,6 +7,7 @@ import {
   encode_credentials
 } from '@frostr/bifrost/encoder'
 
+import type { PeerPolicy }      from '@frostr/bifrost'
 import type { NodeCredentials } from '@/types/node.js'
 
 export function CredentialsConfig() {
@@ -24,15 +26,17 @@ export function CredentialsConfig() {
     if (error !== null) return
     // If the input is empty,
     if (input === '') {
-      store.update({ creds : null })
+      store.update({ creds : null, peers : [] })
     } else {
       try {
         // Parse the input into a group package.
         const creds = decode_credentials(input)
+        // Initialize the peers.
+        const peers = init_peer_permissions(creds)
         // If the credentials package is invalid, return.
         if (creds === null) return
         // Update the credentials in the store.
-        store.update({ creds })
+        store.update({ creds, peers })
       } catch (err) {
         console.log(err)
         setError('failed to decode package data')
@@ -42,6 +46,18 @@ export function CredentialsConfig() {
     setSaved(true)
     setTimeout(() => setSaved(false), 1500)
   }
+
+  useEffect(() => {
+    try {
+      if (store.data.creds !== null) {
+        setInput(get_creds_str(store.data.creds))
+      } else {
+        setInput('')
+      }
+    } catch {
+      setInput('')
+    }
+  }, [ store.data.creds ])
 
   /**
    * Handle the validation of the input when it changes.
@@ -171,4 +187,18 @@ function get_creds_json(input : string) {
   } catch (err) {
     return null
   }
+}
+
+/**
+ * Initialize the peer permissions.
+ */
+function init_peer_permissions (
+  creds : NodeCredentials
+) : PeerPolicy[] {
+  const pubkey = get_pubkey(creds.share.seckey, 'ecdsa')
+  console.log('pubkey', pubkey)
+  console.log('commits', creds.group.commits)
+  return creds.group.commits
+    .filter(commit => commit.pubkey !== pubkey)
+    .map(commit => [ commit.pubkey, false, false ])
 }
