@@ -188,7 +188,6 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
 }
 
 .tabs-navigation {
-  width: 100%;
   display: flex;
   align-items: center;
 }
@@ -231,6 +230,11 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
     text-align: center;
     display: block;
     width: 100%;
+  }
+  
+  .tabs-nav-wrapper {
+    display: flex;
+    justify-content: center;
   }
 }
 

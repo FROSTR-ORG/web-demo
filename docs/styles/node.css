@@ -8,7 +8,6 @@
 .console-container {
   width: 100%; /* Occupy full width of parent (.tab-panel) */
   margin: 0; /* Removed auto margin, parent centers */
-  margin-top: 2rem;
   padding: 0; /* Remove padding, handled by .tab-panel or specific elements within */
   box-sizing: border-box;
 }
