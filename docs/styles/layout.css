@@ -21,7 +21,8 @@
 
 .tabs-navigation {
   display: flex;
-  max-width: 600px;
+  width: 100%;
+  margin: 0 1rem;
   margin-bottom: 20px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
