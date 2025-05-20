@@ -41322,13 +41322,17 @@ function useBifrost() {
       console.log("node closed");
       setStatus("offline");
     });
-    node_ref.current.on("*", (event) => {
+    node_ref.current.on("*", (event, data) => {
+      if (event === "message") return;
+      if (event.startsWith("/ping")) return;
       const log = {
         timestamp: (/* @__PURE__ */ new Date()).toISOString(),
         message: String(event),
         type: "info"
       };
       store.update({ logs: update_log(store_ref.current, log) });
+      console.log("event received:", event);
+      console.dir(data, { depth: null });
     });
     node_ref.current.connect();
   };
@@ -41423,7 +41427,7 @@ function NodeInfo() {
   var _a;
   const node = useNode();
   return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "dashboard-container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { className: "section-header", children: "Node Manager" }),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { className: "section-header", children: "Node Status" }),
     /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("pre", { children: [
       "pubkey: ",
       ((_a = node.ref.current) == null ? void 0 : _a.pubkey) || "unknown"
@@ -41446,14 +41450,20 @@ function PeerInfo() {
   const checkPeerStatus = async () => {
     if (!node.ref.current) return;
     const pongs = await node.ref.current.req.ping();
+    console.log(pongs);
     if (!pongs.ok) return;
-    const peers = store.data.peers.map((peer) => peer[0]);
+    const peers = node.ref.current.peers;
+    const policies = peers.map((peer) => ({
+      pubkey: peer.pubkey,
+      send: peer.policy.send,
+      recv: peer.policy.recv
+    }));
+    store.update({ peers: policies });
     const stats = [];
     for (const peer of peers) {
-      const has_pong = pongs.data.includes(peer);
       stats.push({
-        pubkey: peer,
-        status: has_pong ? "online" : "offline"
+        pubkey: peer.pubkey,
+        status: peer.status
       });
     }
     setPeerStatus(stats);
@@ -41466,7 +41476,7 @@ function PeerInfo() {
   }, [node.status]);
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "dashboard-container", children: [
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h2", { className: "section-header", children: "Peer Status" }),
-    peerStatus.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: "No peers configured" }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("table", { children: [
+    peerStatus.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: "waiting for peers..." }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("table", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("tr", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("th", { children: "Pubkey" }),
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("th", { children: "Status" })
@@ -42119,9 +42129,11 @@ function get_creds_json(input) {
 }
 function init_peer_permissions(creds) {
   const pubkey2 = get_pubkey3(creds.share.seckey, "ecdsa");
-  console.log("pubkey", pubkey2);
-  console.log("commits", creds.group.commits);
-  return creds.group.commits.filter((commit3) => commit3.pubkey !== pubkey2).map((commit3) => [commit3.pubkey, false, false]);
+  return creds.group.commits.filter((commit3) => commit3.pubkey !== pubkey2).map((commit3) => ({
+    pubkey: commit3.pubkey,
+    send: false,
+    recv: true
+  }));
 }
 
 // src/components/settings/peers.tsx
@@ -42161,18 +42173,18 @@ function PeerConfig() {
       /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("table", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Peer Public Key" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "checkbox-cell", children: "Request" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "checkbox-cell", children: "Respond" })
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "checkbox-cell", children: "Send" }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "checkbox-cell", children: "Receive" })
         ] }) }),
         /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("tbody", { children: peers.map((peer, idx) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "pubkey-cell", children: peer[0] }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "pubkey-cell", children: peer.pubkey }),
           /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
             "input",
             {
               type: "checkbox",
               className: "peer-checkbox",
-              checked: peer[1],
-              onChange: () => update_peer(idx, 1, !peer[1])
+              checked: peer.send,
+              onChange: () => update_peer(idx, "send", !peer.send)
             }
           ) }),
           /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
@@ -42180,8 +42192,8 @@ function PeerConfig() {
             {
               type: "checkbox",
               className: "peer-checkbox",
-              checked: peer[2],
-              onChange: () => update_peer(idx, 2, !peer[2])
+              checked: peer.recv,
+              onChange: () => update_peer(idx, "recv", !peer.recv)
             }
           ) })
         ] }, idx)) })

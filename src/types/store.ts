@@ -5,14 +5,14 @@ import type {
 } from '@/types/node.js'
 
 import type {
-  PeerPolicy
+  PeerConfig
 } from '@frostr/bifrost'
 
 export type AppStore = StoreInit | StoreReady
 
 export interface BaseStore {
   relays : RelayPolicy[]
-  peers  : PeerPolicy[]
+  peers  : PeerConfig[]
   logs   : LogEntry[]
 }
 

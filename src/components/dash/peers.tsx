@@ -19,16 +19,25 @@ export function PeerInfo() {
 
     const pongs = await node.ref.current.req.ping()
 
+    console.log(pongs)
+
     if (!pongs.ok) return
-    const peers = store.data.peers.map((peer) => peer[0])
+
+    const peers    = node.ref.current.peers
+    const policies = peers.map(peer => ({
+      pubkey : peer.pubkey,
+      send   : peer.policy.send,
+      recv   : peer.policy.recv
+    }))
+
+    store.update({ peers : policies })
+
     const stats : PeerStatus[] = []
 
     for (const peer of peers) {
-      const has_pong = pongs.data.includes(peer)
-
       stats.push({
-        pubkey   : peer,
-        status   : has_pong ? 'online' : 'offline'
+        pubkey   : peer.pubkey,
+        status   : peer.status
       })
     }
 
@@ -52,7 +61,7 @@ export function PeerInfo() {
     <div className="dashboard-container">
       <h2 className="section-header">Peer Status</h2>
       {peerStatus.length === 0 ? (
-        <p>No peers configured</p>
+        <p>waiting for peers...</p>
       ) : (
         <table>
           <thead>

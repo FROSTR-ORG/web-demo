@@ -8,7 +8,7 @@ import {
   encode_credentials
 } from '@frostr/bifrost/encoder'
 
-import type { PeerPolicy }      from '@frostr/bifrost'
+import type { PeerConfig, PeerPolicy }      from '@frostr/bifrost'
 import type { NodeCredentials } from '@/types/node.js'
 
 export function CredentialsConfig() {
@@ -214,11 +214,13 @@ function get_creds_json(input : string) {
  */
 function init_peer_permissions (
   creds : NodeCredentials
-) : PeerPolicy[] {
+) : PeerConfig[] {
   const pubkey = get_pubkey(creds.share.seckey, 'ecdsa')
-  console.log('pubkey', pubkey)
-  console.log('commits', creds.group.commits)
   return creds.group.commits
     .filter(commit => commit.pubkey !== pubkey)
-    .map(commit => [ commit.pubkey, false, false ])
+    .map(commit => ({
+      pubkey : commit.pubkey,
+      send   : false,
+      recv   : true
+    }))
 }

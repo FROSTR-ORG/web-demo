@@ -50,13 +50,20 @@ export function useBifrost () : NodeAPI {
       setStatus('offline')
     })
 
-    node_ref.current.on('*', (event) => {
+    node_ref.current.on('*', (event, data) => {
+      if (event === 'message')       return
+      if (event.startsWith('/ping')) return
+
       const log = {
         timestamp : new Date().toISOString(),
         message   : String(event),
         type      : 'info' as LogType
       }
+      
       store.update({ logs: update_log(store_ref.current, log) })
+
+      console.log('event received:', event)
+      console.dir(data, { depth : null })
     })
 
     node_ref.current.connect()
