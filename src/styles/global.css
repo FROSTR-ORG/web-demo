@@ -3,6 +3,12 @@
 
 /* ========================================================================= */
 /* Base Styles - Foundation of the Design System */
+
+#root {
+  max-width: 100vw;
+  /* margin: 0 auto; /* Removed to prevent overall centering of the root container */
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -181,11 +187,6 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
   top: 0;
 }
 
-.tabs-navigation {
-  display: flex;
-  align-items: center;
-}
-
 .tab-button {
   display: inline-flex;
   align-items: center;
@@ -196,40 +197,6 @@ input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-c
 .tab-button span {
   display: inline-block;
   vertical-align: middle;
-}
-
-/* Responsive Navigation for Options page */
-@media (max-width: 720px) {
-  .tabs-navigation {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .tab-button {
-    flex-direction: column;
-    padding: 8px 12px;
-    gap: 4px;
-    text-align: center;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .tab-button svg {
-    margin: 0 auto 4px;
-    display: block;
-  }
-  
-  .tab-button span {
-    font-size: 12px;
-    text-align: center;
-    display: block;
-    width: 100%;
-  }
-  
-  .tabs-nav-wrapper {
-    display: flex;
-    justify-content: center;
-  }
 }
 
 /* Table styles - Global enhancements for all tables */
