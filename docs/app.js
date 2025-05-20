@@ -1120,7 +1120,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher.useContext(Context2);
         }
-        function useState8(initialState) {
+        function useState9(initialState) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useState(initialState);
         }
@@ -1132,7 +1132,7 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useRef(initialValue);
         }
-        function useEffect6(create, deps) {
+        function useEffect7(create, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useEffect(create, deps);
         }
@@ -1915,7 +1915,7 @@ var require_react_development = __commonJS({
         exports.useContext = useContext3;
         exports.useDebugValue = useDebugValue;
         exports.useDeferredValue = useDeferredValue;
-        exports.useEffect = useEffect6;
+        exports.useEffect = useEffect7;
         exports.useId = useId;
         exports.useImperativeHandle = useImperativeHandle;
         exports.useInsertionEffect = useInsertionEffect;
@@ -1923,7 +1923,7 @@ var require_react_development = __commonJS({
         exports.useMemo = useMemo;
         exports.useReducer = useReducer;
         exports.useRef = useRef3;
-        exports.useState = useState8;
+        exports.useState = useState9;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
         exports.version = ReactVersion;
@@ -24500,11 +24500,11 @@ var require_react_jsx_runtime_development = __commonJS({
             return jsxWithValidation(type, props, key, false);
           }
         }
-        var jsx16 = jsxWithValidationDynamic;
-        var jsxs13 = jsxWithValidationStatic;
+        var jsx17 = jsxWithValidationDynamic;
+        var jsxs14 = jsxWithValidationStatic;
         exports.Fragment = REACT_FRAGMENT_TYPE;
-        exports.jsx = jsx16;
-        exports.jsxs = jsxs13;
+        exports.jsx = jsx17;
+        exports.jsxs = jsxs14;
       })();
     }
   }
@@ -24535,7 +24535,7 @@ var init_qr_scanner_worker_min = __esm({
 });
 
 // src/index.tsx
-var import_react9 = __toESM(require_react(), 1);
+var import_react10 = __toESM(require_react(), 1);
 var import_client3 = __toESM(require_client(), 1);
 
 // node_modules/@noble/hashes/esm/crypto.js
@@ -41397,9 +41397,9 @@ function Header() {
 }
 
 // src/components/layout/tabs.tsx
-var import_react8 = __toESM(require_react(), 1);
+var import_react9 = __toESM(require_react(), 1);
 
-// src/components/node/console.tsx
+// src/components/dash/console.tsx
 var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
 function Console() {
   const store = useStore();
@@ -41417,9 +41417,9 @@ function Console() {
   ] });
 }
 
-// src/components/node/dash.tsx
+// src/components/dash/node.tsx
 var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
-function Dashboard() {
+function NodeInfo() {
   var _a;
   const node = useNode();
   return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "dashboard-container", children: [
@@ -41436,11 +41436,63 @@ function Dashboard() {
   ] });
 }
 
+// src/components/dash/peers.tsx
+var import_react4 = __toESM(require_react(), 1);
+var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+function PeerInfo() {
+  const node = useNode();
+  const store = useStore();
+  const [peerStatus, setPeerStatus] = (0, import_react4.useState)([]);
+  const checkPeerStatus = async () => {
+    if (!node.ref.current) return;
+    const pongs = await node.ref.current.req.ping();
+    if (!pongs.ok) return;
+    const peers = store.data.peers.map((peer) => peer[0]);
+    const stats = [];
+    for (const peer of peers) {
+      const has_pong = pongs.data.includes(peer);
+      stats.push({
+        pubkey: peer,
+        status: has_pong ? "online" : "offline"
+      });
+    }
+    setPeerStatus(stats);
+  };
+  (0, import_react4.useEffect)(() => {
+    if (node.status !== "online") return;
+    checkPeerStatus();
+    const interval = setInterval(checkPeerStatus, 3e4);
+    return () => clearInterval(interval);
+  }, [node.status]);
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "dashboard-container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h2", { className: "section-header", children: "Peer Status" }),
+    peerStatus.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: "No peers configured" }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("th", { children: "Pubkey" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("th", { children: "Status" })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("tbody", { children: peerStatus.map((peer) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("td", { className: "pubkey-cell", children: peer.pubkey }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "status-indicator ".concat(peer.status), children: peer.status }) })
+      ] }, peer.pubkey)) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      "button",
+      {
+        className: "button",
+        onClick: checkPeerStatus,
+        disabled: node.status !== "online",
+        children: "Refresh"
+      }
+    )
+  ] });
+}
+
 // src/components/settings/creds.tsx
-var import_react5 = __toESM(require_react(), 1);
+var import_react6 = __toESM(require_react(), 1);
 
 // src/components/util/scanner.tsx
-var import_react4 = __toESM(require_react(), 1);
+var import_react5 = __toESM(require_react(), 1);
 
 // node_modules/qr-scanner/qr-scanner.min.js
 var e = class _e {
@@ -41828,7 +41880,7 @@ e._workerMessageId = 0;
 var qr_scanner_min_default = e;
 
 // src/components/util/scanner.tsx
-var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
 var styles = {
   container: {
     width: "100%",
@@ -41847,11 +41899,11 @@ var styles = {
   }
 };
 function QRScanner({ onResult, onError }) {
-  const videoRef = (0, import_react4.useRef)(null);
-  const scannerRef = (0, import_react4.useRef)(null);
-  const [error, setError] = (0, import_react4.useState)(null);
-  const [hasPerm, setPerm] = (0, import_react4.useState)(null);
-  (0, import_react4.useEffect)(() => {
+  const videoRef = (0, import_react5.useRef)(null);
+  const scannerRef = (0, import_react5.useRef)(null);
+  const [error, setError] = (0, import_react5.useState)(null);
+  const [hasPerm, setPerm] = (0, import_react5.useState)(null);
+  (0, import_react5.useEffect)(() => {
     let scanner = null;
     const initializeScanner = async () => {
       if (!videoRef.current) {
@@ -41889,8 +41941,8 @@ function QRScanner({ onResult, onError }) {
       }
     };
   }, [onResult, onError]);
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { style: styles.container, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { style: styles.container, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
       "video",
       {
         ref: videoRef,
@@ -41900,7 +41952,7 @@ function QRScanner({ onResult, onError }) {
         muted: true
       }
     ),
-    error && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { style: {
+    error && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { style: {
       position: "absolute",
       top: "50%",
       left: "50%",
@@ -41913,21 +41965,21 @@ function QRScanner({ onResult, onError }) {
       zIndex: 1e3
     }, children: [
       error,
-      hasPerm === false && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { style: { marginTop: "1rem" }, children: "Please grant camera permissions to use the QR scanner" })
+      hasPerm === false && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { style: { marginTop: "1rem" }, children: "Please grant camera permissions to use the QR scanner" })
     ] })
   ] });
 }
 
 // src/components/settings/creds.tsx
-var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
 function CredentialsConfig() {
   var _a;
   const store = useStore();
-  const [input, setInput] = (0, import_react5.useState)("");
-  const [error, setError] = (0, import_react5.useState)(null);
-  const [show, setShow] = (0, import_react5.useState)(false);
-  const [saved, setSaved] = (0, import_react5.useState)(false);
-  const [isScanning, setIsScanning] = (0, import_react5.useState)(false);
+  const [input, setInput] = (0, import_react6.useState)("");
+  const [error, setError] = (0, import_react6.useState)(null);
+  const [show, setShow] = (0, import_react6.useState)(false);
+  const [saved, setSaved] = (0, import_react6.useState)(false);
+  const [isScanning, setIsScanning] = (0, import_react6.useState)(false);
   const update_creds = () => {
     if (error !== null) return;
     if (input === "") {
@@ -41946,7 +41998,7 @@ function CredentialsConfig() {
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   };
-  (0, import_react5.useEffect)(() => {
+  (0, import_react6.useEffect)(() => {
     try {
       if (store.data.creds !== null) {
         setInput(get_creds_str(store.data.creds));
@@ -41957,7 +42009,7 @@ function CredentialsConfig() {
       setInput("");
     }
   }, [store.data.creds]);
-  (0, import_react5.useEffect)(() => {
+  (0, import_react6.useEffect)(() => {
     if (input === "") {
       setError(null);
     } else if (!input.startsWith("bfcred")) {
@@ -41973,12 +42025,12 @@ function CredentialsConfig() {
       }
     }
   }, [input]);
-  return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h2", { className: "section-header", children: "Credentials Package" }),
-    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "description", children: "Paste your encoded credentials string (starts with bfcred). It contains your secrets, plus information about your signing group." }),
-    /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "content-container", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "input-with-button", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("h2", { className: "section-header", children: "Credentials Package" }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { className: "description", children: "Paste your encoded credentials string (starts with bfcred). It contains your secrets, plus information about your signing group." }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "content-container", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "input-with-button", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
           "input",
           {
             type: show ? "text" : "password",
@@ -41987,8 +42039,8 @@ function CredentialsConfig() {
             placeholder: "bfcred1..."
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "input-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "input-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
             "button",
             {
               className: "button",
@@ -41996,7 +42048,7 @@ function CredentialsConfig() {
               children: show ? "hide" : "show"
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
             "button",
             {
               className: "button",
@@ -42004,7 +42056,7 @@ function CredentialsConfig() {
               children: isScanning ? "stop scan" : "scan"
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
             "button",
             {
               className: "button action-button ".concat(saved ? "saved-button" : ""),
@@ -42015,7 +42067,7 @@ function CredentialsConfig() {
           )
         ] })
       ] }),
-      isScanning && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+      isScanning && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
         QRScanner,
         {
           onResult: (result) => {
@@ -42027,8 +42079,8 @@ function CredentialsConfig() {
           }
         }
       ),
-      input !== "" && error === null && show && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("pre", { className: "code-display", children: (_a = get_creds_json(input)) != null ? _a : "invalid group package" }),
-      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "notification-container", children: error && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "error-text", children: error }) })
+      input !== "" && error === null && show && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("pre", { className: "code-display", children: (_a = get_creds_json(input)) != null ? _a : "invalid group package" }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { className: "notification-container", children: error && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { className: "error-text", children: error }) })
     ] })
   ] });
 }
@@ -42073,13 +42125,13 @@ function init_peer_permissions(creds) {
 }
 
 // src/components/settings/peers.tsx
-var import_react6 = __toESM(require_react(), 1);
-var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
+var import_react7 = __toESM(require_react(), 1);
+var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
 function PeerConfig() {
   const store = useStore();
-  const [peers, setPeers] = (0, import_react6.useState)(store.data.peers);
-  const [changes, setChanges] = (0, import_react6.useState)(false);
-  const [saved, setSaved] = (0, import_react6.useState)(false);
+  const [peers, setPeers] = (0, import_react7.useState)(store.data.peers);
+  const [changes, setChanges] = (0, import_react7.useState)(false);
+  const [saved, setSaved] = (0, import_react7.useState)(false);
   const update = () => {
     store.update({ peers });
     setChanges(false);
@@ -42098,23 +42150,23 @@ function PeerConfig() {
     });
     setChanges(true);
   };
-  (0, import_react6.useEffect)(() => {
+  (0, import_react7.useEffect)(() => {
     setPeers(store.data.peers);
   }, [store.data.peers]);
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("h2", { className: "section-header", children: "Peer Connections" }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { className: "description", children: 'Configure how you communicate with other peers in your signing group. "Request" will send signature requests to that peer, and "Respond" will co-sign requests from that peer.' }),
-    peers === null && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { className: "description", children: "You must configure your node's credentials first." }),
-    peers !== null && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("table", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("th", { children: "Peer Public Key" }),
-          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("th", { className: "checkbox-cell", children: "Request" }),
-          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("th", { className: "checkbox-cell", children: "Respond" })
+  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("h2", { className: "section-header", children: "Peer Connections" }),
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("p", { className: "description", children: 'Configure how you communicate with other peers in your signing group. "Request" will send signature requests to that peer, and "Respond" will co-sign requests from that peer.' }),
+    peers === null && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("p", { className: "description", children: "You must configure your node's credentials first." }),
+    peers !== null && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("table", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Peer Public Key" }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "checkbox-cell", children: "Request" }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "checkbox-cell", children: "Respond" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("tbody", { children: peers.map((peer, idx) => /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("td", { className: "pubkey-cell", children: peer[0] }),
-          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("tbody", { children: peers.map((peer, idx) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "pubkey-cell", children: peer[0] }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
             "input",
             {
               type: "checkbox",
@@ -42123,7 +42175,7 @@ function PeerConfig() {
               onChange: () => update_peer(idx, 1, !peer[1])
             }
           ) }),
-          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
             "input",
             {
               type: "checkbox",
@@ -42134,8 +42186,8 @@ function PeerConfig() {
           ) })
         ] }, idx)) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "action-buttons", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "action-buttons", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
           "button",
           {
             onClick: update,
@@ -42144,7 +42196,7 @@ function PeerConfig() {
             children: saved ? "Saved" : "Save"
           }
         ),
-        changes && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+        changes && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
           "button",
           {
             onClick: cancel,
@@ -42158,15 +42210,15 @@ function PeerConfig() {
 }
 
 // src/components/settings/relays.tsx
-var import_react7 = __toESM(require_react(), 1);
-var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+var import_react8 = __toESM(require_react(), 1);
+var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
 function RelayConfig() {
   const store = useStore();
-  const [relays, setRelays] = (0, import_react7.useState)(store.data.relays);
-  const [relayUrl, setUrl] = (0, import_react7.useState)("");
-  const [changes, setChanges] = (0, import_react7.useState)(false);
-  const [error, setError] = (0, import_react7.useState)(null);
-  const [saved, setSaved] = (0, import_react7.useState)(false);
+  const [relays, setRelays] = (0, import_react8.useState)(store.data.relays);
+  const [relayUrl, setUrl] = (0, import_react8.useState)("");
+  const [changes, setChanges] = (0, import_react8.useState)(false);
+  const [error, setError] = (0, import_react8.useState)(null);
+  const [saved, setSaved] = (0, import_react8.useState)(false);
   const update = () => {
     store.update({ relays });
     setChanges(false);
@@ -42205,25 +42257,25 @@ function RelayConfig() {
     setRelays((prev) => prev.filter((_, i2) => i2 !== idx));
     setChanges(true);
   };
-  (0, import_react7.useEffect)(() => {
+  (0, import_react8.useEffect)(() => {
     if (error !== null) setError(null);
   }, [relayUrl]);
-  (0, import_react7.useEffect)(() => {
+  (0, import_react8.useEffect)(() => {
     setRelays(store.data.relays);
   }, [store.data.relays]);
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("h2", { className: "section-header", children: "Relay Connections" }),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("p", { className: "description", children: 'Configure which relays your node will use to communicate. "Read" will enable listening for inbound requests, and "Write" will enable publishing outbound requests.' }),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("table", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "url-column", children: "Relay URL" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "checkbox-cell", children: "Read" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "checkbox-cell", children: "Write" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "action-cell", children: "Actions" })
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("h2", { className: "section-header", children: "Relay Connections" }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("p", { className: "description", children: 'Configure which relays your node will use to communicate. "Read" will enable listening for inbound requests, and "Write" will enable publishing outbound requests.' }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "url-column", children: "Relay URL" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "checkbox-cell", children: "Read" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "checkbox-cell", children: "Write" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "action-cell", children: "Actions" })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("tbody", { children: relays.map((relay, idx) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { children: relay.url }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("tbody", { children: relays.map((relay, idx) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: relay.url }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
           "input",
           {
             type: "checkbox",
@@ -42232,7 +42284,7 @@ function RelayConfig() {
             onChange: () => update_relay(idx, "read")
           }
         ) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "checkbox-cell", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
           "input",
           {
             type: "checkbox",
@@ -42241,7 +42293,7 @@ function RelayConfig() {
             onChange: () => update_relay(idx, "write")
           }
         ) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "action-cell", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "action-cell", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
           "button",
           {
             onClick: () => remove_relay(idx),
@@ -42251,8 +42303,8 @@ function RelayConfig() {
         ) })
       ] }, idx)) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "input-group relay-controls", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "input-group relay-controls", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
         "input",
         {
           type: "text",
@@ -42262,10 +42314,10 @@ function RelayConfig() {
           className: "relay-input"
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("button", { onClick: add_relay, className: "button add-relay-button", children: "Add Relay" })
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("button", { onClick: add_relay, className: "button add-relay-button", children: "Add Relay" })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "action-buttons", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "action-buttons", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
         "button",
         {
           onClick: update,
@@ -42274,7 +42326,7 @@ function RelayConfig() {
           children: saved ? "Saved" : "Save"
         }
       ),
-      changes && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+      changes && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
         "button",
         {
           onClick: cancel,
@@ -42282,7 +42334,7 @@ function RelayConfig() {
           children: "Cancel"
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "notification-container", children: error && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("p", { className: "error-text", children: error }) })
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "notification-container", children: error && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("p", { className: "error-text", children: error }) })
     ] })
   ] });
 }
@@ -42296,16 +42348,16 @@ function validateUrl(url2) {
 }
 
 // src/components/settings/reset.tsx
-var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
 function ResetStore() {
   const store = useStore();
   const reset = () => {
     store.reset();
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("h2", { className: "section-header", children: "Reset Store" }),
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("p", { className: "description", children: "Reset the store to the initial state." }),
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h2", { className: "section-header", children: "Reset Store" }),
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "description", children: "Reset the store to the initial state." }),
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       "button",
       {
         onClick: reset,
@@ -42317,106 +42369,107 @@ function ResetStore() {
 }
 
 // src/components/settings/index.tsx
-var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
 function Settings() {
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(CredentialsConfig, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PeerConfig, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(RelayConfig, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ResetStore, {})
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(CredentialsConfig, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(PeerConfig, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(RelayConfig, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ResetStore, {})
   ] });
 }
 
 // src/components/util/icons.tsx
-var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
-var SettingsIcon = () => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-  /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("circle", { cx: "12", cy: "12", r: "3" }),
-  /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("path", { d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" })
+var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+var SettingsIcon = () => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+  /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("circle", { cx: "12", cy: "12", r: "3" }),
+  /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("path", { d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" })
 ] });
-var ConsoleIcon = () => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-  /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("polyline", { points: "4 17 10 11 4 5" }),
-  /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("line", { x1: "12", y1: "19", x2: "20", y2: "19" })
+var ConsoleIcon = () => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+  /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("polyline", { points: "4 17 10 11 4 5" }),
+  /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("line", { x1: "12", y1: "19", x2: "20", y2: "19" })
 ] });
 
 // src/components/layout/tabs.tsx
-var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
 function Tabs() {
-  const [activeTab, setActiveTab] = (0, import_react8.useState)("dashboard");
-  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "tabs-container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "tabs-nav-wrapper", children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "tabs-navigation", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+  const [activeTab, setActiveTab] = (0, import_react9.useState)("dashboard");
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "tabs-container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "tabs-nav-wrapper", children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "tabs-navigation", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
         "button",
         {
           className: "tab-button ".concat(activeTab === "dashboard" ? "active" : ""),
           onClick: () => setActiveTab("dashboard"),
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(ConsoleIcon, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { children: "Dashboard" })
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(ConsoleIcon, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { children: "Dashboard" })
           ]
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
         "button",
         {
           className: "tab-button ".concat(activeTab === "settings" ? "active" : ""),
           onClick: () => setActiveTab("settings"),
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(SettingsIcon, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { children: "Settings" })
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(SettingsIcon, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { children: "Settings" })
           ]
         }
       )
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "tab-content", children: [
-      activeTab === "dashboard" && /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "tab-panel", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Dashboard, {}),
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Console, {})
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "tab-content", children: [
+      activeTab === "dashboard" && /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "tab-panel", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(NodeInfo, {}),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(PeerInfo, {}),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Console, {})
       ] }),
-      activeTab === "settings" && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "tab-panel", children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Settings, {}) })
+      activeTab === "settings" && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "tab-panel", children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Settings, {}) })
     ] })
   ] });
 }
 
 // src/components/layout/app.tsx
-var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
 function App() {
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "app", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Header, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Tabs, {})
+  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "app", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Header, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Tabs, {})
   ] });
 }
 
-// css-ns:/Users/plebdev/Desktop/code/web-demo/src/styles/global.css
+// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/global.css
 var link = document.createElement("link");
 link.rel = "stylesheet";
 link.href = "styles/global.css";
 document.head.appendChild(link);
 
-// css-ns:/Users/plebdev/Desktop/code/web-demo/src/styles/layout.css
+// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/layout.css
 var link2 = document.createElement("link");
 link2.rel = "stylesheet";
 link2.href = "styles/layout.css";
 document.head.appendChild(link2);
 
-// css-ns:/Users/plebdev/Desktop/code/web-demo/src/styles/node.css
+// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/node.css
 var link3 = document.createElement("link");
 link3.rel = "stylesheet";
 link3.href = "styles/node.css";
 document.head.appendChild(link3);
 
-// css-ns:/Users/plebdev/Desktop/code/web-demo/src/styles/settings.css
+// css-ns:/home/cscott/Repos/frostr/web-demo/src/styles/settings.css
 var link4 = document.createElement("link");
 link4.rel = "stylesheet";
 link4.href = "styles/settings.css";
 document.head.appendChild(link4);
 
 // src/index.tsx
-var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
 var container = document.getElementById("root");
 if (!container) throw new Error("[ app ] root container not found");
 var root = (0, import_client3.createRoot)(container);
 root.render(
-  /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(import_react9.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(StoreProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(NodeProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(App, {}) }) }) })
+  /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(import_react10.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(StoreProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(NodeProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(App, {}) }) }) })
 );
 /*! Bundled license information:
 

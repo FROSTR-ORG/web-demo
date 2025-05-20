@@ -128,32 +128,35 @@
 /* Status Indicators */
 .status-indicator {
   display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+  text-transform: capitalize;
 }
 
-.status-indicator.connected {
-  background-color: #00b894;
+.status-indicator.online {
+  background-color: #4caf50;
+  color: white;
 }
 
-.status-indicator.disconnected {
-  background-color: #e74c3c;
+.status-indicator.offline {
+  background-color: #f44336;
+  color: white;
 }
 
-.status-text {
-  font-size: 14px;
-  color: #e6e6e6;
+.status-indicator.unknown {
+  background-color: #9e9e9e;
+  color: white;
+}
+
+.pubkey-cell {
+  font-family: monospace;
+  font-size: 0.9em;
 }
 
 /* Add media query for smaller screens */
 @media (max-width: 720px) {
-  .console-container,
-  .dashboard-container {
-    /* padding: 15px 10px; Removed, parent handles padding */
-  }
-
   .console-controls {
     justify-content: center; /* Center the button */
   }

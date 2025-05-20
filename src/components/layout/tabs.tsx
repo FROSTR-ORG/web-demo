@@ -1,8 +1,8 @@
-
-import { useState }  from 'react'
-import { Console }   from '@/components/node/console.js'
-import { Dashboard } from '@/components/node/dash.js'
-import { Settings }  from '@/components/settings/index.js'
+import { useState } from 'react'
+import { Console }  from '@/components/dash/console.js'
+import { NodeInfo } from '@/components/dash/node.js'
+import { PeerInfo } from '@/components/dash/peers.js'
+import { Settings } from '@/components/settings/index.js'
 
 import type { ReactElement } from 'react'
 
@@ -37,7 +37,8 @@ export function Tabs(): ReactElement {
       <div className="tab-content">
         {activeTab === 'dashboard' && (
           <div className="tab-panel">
-            <Dashboard />
+            <NodeInfo />
+            <PeerInfo />
             <Console />
           </div>
         )}

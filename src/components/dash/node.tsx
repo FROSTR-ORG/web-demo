@@ -1,6 +1,6 @@
 import { useNode } from '@/context/node.js'
 
-export function Dashboard () {
+export function NodeInfo () {
   const node = useNode()
 
   return (
