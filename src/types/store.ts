@@ -1,11 +1,12 @@
 import type {
   LogEntry,
-  NodeCredentials,
   RelayPolicy
 } from '@/types/node.js'
 
 import type {
-  PeerConfig
+  GroupPackage,
+  PeerConfig,
+  SharePackage
 } from '@frostr/bifrost'
 
 export type AppStore = StoreInit | StoreReady
@@ -17,9 +18,11 @@ export interface BaseStore {
 }
 
 export interface StoreInit extends BaseStore {
-  creds : null
+  group : null
+  share : null
 }
 
 export interface StoreReady extends BaseStore {
-  creds : NodeCredentials
+  group : GroupPackage
+  share : SharePackage
 }

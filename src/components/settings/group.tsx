@@ -1,17 +1,15 @@
 import { useEffect, useState } from 'react'
-import { get_pubkey }          from '@frostr/bifrost/util'
 import { useStore }            from '@/store/index.js'
 import { QRScanner }           from '@/components/util/scanner.js'
 
 import {
-  decode_credentials,
-  encode_credentials
+  decode_group_pkg,
+  encode_group_pkg
 } from '@frostr/bifrost/encoder'
 
-import type { PeerConfig, PeerPolicy }      from '@frostr/bifrost'
-import type { NodeCredentials } from '@/types/node.js'
+import type { GroupPackage } from '@frostr/bifrost'
 
-export function CredentialsConfig() {
+export function GroupConfig() {
   const store = useStore()
 
   const [ input, setInput ] = useState<string>('')
@@ -23,22 +21,20 @@ export function CredentialsConfig() {
   /**
    * Handle the update of the store.
    */
-  const update_creds = () => {
+  const update_group = () => {
     // If an error exists, do not update the group.
     if (error !== null) return
     // If the input is empty,
     if (input === '') {
-      store.update({ creds : null, peers : [] })
+      store.update({ group : null })
     } else {
       try {
         // Parse the input into a group package.
-        const creds = decode_credentials(input)
-        // Initialize the peers.
-        const peers = init_peer_permissions(creds)
-        // If the credentials package is invalid, return.
-        if (creds === null) return
-        // Update the credentials in the store.
-        store.update({ creds, peers })
+        const group = decode_group_pkg(input)
+        // If the group package is invalid, return.
+        if (group === null) return
+        // Update the group in the store.
+        store.update({ group })
       } catch (err) {
         console.log(err)
         setError('failed to decode package data')
@@ -49,17 +45,32 @@ export function CredentialsConfig() {
     setTimeout(() => setSaved(false), 1500)
   }
 
+  /**
+   * Handle the loading of the group from the URL.
+   */
+  useEffect(() => {
+    const params  = new URLSearchParams(window.location.search)
+    const group   = store.data.group
+    const g_param = params.get('g')
+    if (!group && g_param) {
+      const pkg = get_group_pkg(g_param)
+      if (pkg === null) return
+      setInput(g_param)
+      store.update({ group : pkg })
+    }
+  }, [ store.data.group ])
+
   useEffect(() => {
     try {
-      if (store.data.creds !== null) {
-        setInput(get_creds_str(store.data.creds))
+      if (store.data.group !== null) {
+        setInput(get_group_str(store.data.group))
       } else {
         setInput('')
       }
     } catch {
       setInput('')
     }
-  }, [ store.data.creds ])
+  }, [ store.data.group ])
 
   /**
    * Handle the validation of the input when it changes.
@@ -68,16 +79,16 @@ export function CredentialsConfig() {
     // If the input is empty, clear the error.
     if (input === '') {
       setError(null)
-    } else if (!input.startsWith('bfcred')) {
-      // If the input does not start with "bfcred", set an error.
-      setError('input must start with "bfcred"')
-    } else if (!is_cred_string(input)) {
+    } else if (!input.startsWith('bfgroup')) {
+      // If the input does not start with "bfgroup", set an error.
+      setError('input must start with "bfgroup"')
+    } else if (!is_group_string(input)) {
       // If the input contains invalid characters, set an error.
       setError('input contains invalid characters')
     } else {
-      // Parse the input into a credential package.
-      const pkg = get_creds_pkg(input)
-      // If the credential package is valid, clear the error.
+      // Parse the input into a group package.
+      const pkg = get_group_pkg(input)
+      // If the group package is valid, clear the error.
       if (pkg !== null) {
         setError(null)
       } else {
@@ -89,15 +100,15 @@ export function CredentialsConfig() {
 
   return (
     <div className="container">
-      <h2 className="section-header">Credentials Package</h2>
-      <p className="description">Paste your encoded credentials string (starts with bfcred). It contains your secrets, plus information about your signing group.</p>
+      <h2 className="section-header">Group Package</h2>
+      <p className="description">Paste your encoded group string (starts with bfgroup). It contains information about your signing group.</p>
       <div className="content-container">
         <div className="input-with-button">
           <input
             type={show ? "text" : "password"}
             value={input}
             onChange={e => setInput(e.target.value.trim())}
-            placeholder="bfcred1..."
+            placeholder="bfgroup1..."
           />
           <div className="input-actions">
             <button 
@@ -114,8 +125,8 @@ export function CredentialsConfig() {
             </button>
             <button
               className={`button action-button ${saved ? 'saved-button' : ''}`} 
-              onClick={update_creds}
-              disabled={!is_creds_changed(input, store.data.creds) || error !== null}
+              onClick={update_group}
+              disabled={!is_group_changed(input, store.data.group) || error !== null}
             >
               {saved ? 'Saved' : 'Save'}
             </button>
@@ -136,7 +147,7 @@ export function CredentialsConfig() {
         
         {input !== '' && error === null && show && (
           <pre className="code-display">
-            {get_creds_json(input) ?? 'invalid group package'}
+            {get_group_json(input) ?? 'invalid group package'}
           </pre>
         )}
         <div className="notification-container">
@@ -148,36 +159,36 @@ export function CredentialsConfig() {
 }
 
 /**
- * Check if the input is a valid credential string.
+ * Check if the input is a valid group string.
  */
-function is_cred_string(input : string) {
-  return /^bfcred1[023456789acdefghjklmnpqrstuvwxyz]+$/.test(input)
+function is_group_string(input : string) {
+  return /^bfgroup1[023456789acdefghjklmnpqrstuvwxyz]+$/.test(input)
 }
 
 /**
  * Check if the input has changed and is valid.
  */
-function is_creds_changed (
+function is_group_changed (
   input : string,
-  creds : NodeCredentials | null
+  group : GroupPackage | null
 ) {
-  if (creds === null) {
+  if (group === null) {
     return input !== ''
   } else {
-    // Encode the existing credentials to a string.
-    const creds_str = get_creds_str(creds)
-    // Determine if the credentials input has changed and is valid.
-    return input !== creds_str
+    // Encode the existing group to a string.
+    const group_str = get_group_str(group)
+    // Determine if the group input has changed and is valid.
+    return input !== group_str
   }
 }
 
 /**
- * Get the credentials string from the package.
+ * Get the group string from the package.
  */
-function get_creds_str (creds : NodeCredentials) {
+function get_group_str (group : GroupPackage) {
   try {
-    return (creds !== null)
-      ? encode_credentials(creds.group, creds.share)
+    return (group !== null)
+      ? encode_group_pkg(group)
       : ''
   } catch {
     return ''
@@ -185,12 +196,12 @@ function get_creds_str (creds : NodeCredentials) {
 }
 
 /**
- * Get the credentials package from the input.
+ * Get the group package from the input.
  */
-function get_creds_pkg (input : string) {
+function get_group_pkg (input : string) {
   try {
     return (input !== '')
-      ? decode_credentials(input)
+      ? decode_group_pkg(input)
       : null
   } catch {
     return null
@@ -198,29 +209,14 @@ function get_creds_pkg (input : string) {
 }
 
 /**
- * Get the credentials JSON from the input.
+ * Get the group JSON from the input.
  */
-function get_creds_json(input : string) {
+function get_group_json(input : string) {
   try {
-    const creds = decode_credentials(input)
-    return JSON.stringify(creds, null, 2)
+    const group = decode_group_pkg(input)
+    return JSON.stringify(group, null, 2)
   } catch (err) {
     return null
   }
 }
 
-/**
- * Initialize the peer permissions.
- */
-function init_peer_permissions (
-  creds : NodeCredentials
-) : PeerConfig[] {
-  const pubkey = get_pubkey(creds.share.seckey, 'ecdsa')
-  return creds.group.commits
-    .filter(commit => commit.pubkey !== pubkey)
-    .map(commit => ({
-      pubkey : commit.pubkey,
-      send   : false,
-      recv   : true
-    }))
-}

@@ -64,6 +64,22 @@ export function RelayConfig() {
   }
 
   useEffect(() => {
+    const params  = new URLSearchParams(window.location.search)
+    const r_param = params.getAll('r')
+    if (r_param.length > 0) {
+      const new_relays : RelayPolicy[] = []
+      for (const r_url of r_param) {
+        if (!relays.some(relay => relay.url === r_url)) {
+          new_relays.push({ url: r_url, read: true, write: true })
+        }
+      }
+      if (new_relays.length > 0) {
+        store.update({ relays : [ ...relays, ...new_relays ] })
+      }
+    }
+  }, [ store.data.relays ])
+
+  useEffect(() => {
     if (error !== null) setError(null)
   }, [ relayUrl ])
 

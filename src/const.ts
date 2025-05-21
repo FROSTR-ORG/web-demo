@@ -5,7 +5,8 @@ export const LOG_LIMIT = 100
 export const STORE_KEY = 'frostr-demo'
 
 export const DEFAULT_STORE : AppStore = {
-  creds  : null,
+  group  : null,
+  share  : null,
   relays : [],
   peers  : [],
   logs   : []

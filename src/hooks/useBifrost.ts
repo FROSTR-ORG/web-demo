@@ -29,11 +29,11 @@ export function useBifrost () : NodeAPI {
 
     store.update({ logs: [] })
 
-    const { creds, peers, relays } = store.data
+    const { group, share, peers, relays } = store.data
 
     const urls = relays.map(r => r.url)
 
-    node_ref.current = new BifrostNode(creds.group, creds.share, urls, { policies : peers })
+    node_ref.current = new BifrostNode(group, share, urls, { policies : peers })
 
     node_ref.current.once('ready', () => {
       console.log('node ready')
@@ -76,13 +76,13 @@ export function useBifrost () : NodeAPI {
 
   useEffect(() => {
     reset()
-  }, [ store.data.creds, store.data.relays, store.data.peers ])
+  }, [ store.data.group, store.data.share, store.data.relays, store.data.peers ])
 
   return { ref: node_ref, reset, stop, status }
 }
 
 function is_store_ready (store : AppStore) : store is StoreReady {
-  return store.creds !== null && store.relays.length > 0
+  return store.group !== null && store.share !== null && store.relays.length > 0
 }
 
 function update_log (store : AppStore, log : LogEntry) {

@@ -1,4 +1,8 @@
-import { encode_credentials }  from '@frostr/bifrost/encoder'
+import {
+  encode_group_pkg,
+  encode_share_pkg
+} from '@frostr/bifrost/encoder'
+
 import { generate_dealer_pkg } from '@frostr/bifrost/lib'
 
 const shares    = parseInt(process.argv[2] ?? '3')
@@ -11,8 +15,12 @@ if (threshold > shares) {
 
 const pkg = generate_dealer_pkg(threshold, shares)
 
+const enc_group = encode_group_pkg(pkg.group)
+console.log(`==== [ Group Package ] `.padEnd(80, '=') + '\n')
+console.log(enc_group + '\n')
+
 for (const share of pkg.shares) {
-  const credentials = encode_credentials(pkg.group, share)
-  console.log(`==== [ Share ${share.idx} Credentials ] `.padEnd(80, '=') + '\n')
-  console.log(credentials + '\n')
+  const enc_share = encode_share_pkg(share)
+  console.log(`==== [ Share ${share.idx} Package ] `.padEnd(80, '=') + '\n')
+  console.log(enc_share + '\n')
 }

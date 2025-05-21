@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useStore } from '@/store/index.js'
+import { useStore }            from '@/store/index.js'
 
-import type { PeerConfig } from '@frostr/bifrost'
+import type { GroupPackage, PeerConfig } from '@frostr/bifrost'
 
 export function PeerConfig() {
   const store = useStore()
@@ -37,6 +37,15 @@ export function PeerConfig() {
   useEffect(() => {
     setPeers(store.data.peers)
   }, [ store.data.peers ])
+
+  useEffect(() => {
+    const { share, group, peers } = store.data
+    if (share && group && peers.length === 0) {
+      setPeers(init_peer_permissions(group, share.idx))
+    } else if (!share || !group) {
+      setPeers([])
+    }
+  }, [ store.data.share, store.data.group ])
 
   return (
     <div className="container">
@@ -104,4 +113,20 @@ export function PeerConfig() {
       }
     </div>
   )
+}
+
+/**
+ * Initialize the peer permissions.
+ */
+function init_peer_permissions (
+  group    : GroupPackage,
+  self_idx : number
+) : PeerConfig[] {
+  return group.commits
+    .filter((commit) => commit.idx !== self_idx)
+    .map(commit => ({
+      pubkey : commit.pubkey,
+      send   : false,
+      recv   : true
+    }))
 }
