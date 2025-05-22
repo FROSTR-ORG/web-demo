@@ -2,7 +2,7 @@ import { BifrostNode } from '@frostr/bifrost'
 import { useStore }    from '@/store/index.js'
 import { LOG_LIMIT }   from '@/const.js'
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 
 import type {
   AppStore,
