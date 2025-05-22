@@ -2,7 +2,7 @@ import { BifrostNode } from '@frostr/bifrost'
 import { useStore }    from '@/store/index.js'
 import { LOG_LIMIT }   from '@/const.js'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 
 import type {
   AppStore,
@@ -20,65 +20,75 @@ export function useBifrost () : NodeAPI {
   const node_ref  = useRef<BifrostNode | null>(null)
   const store_ref = useRef(store.data)
 
+  // Keep store_ref in sync with store.data
   useEffect(() => {
     store_ref.current = store.data
-  }, [store.data])
+  }, [ store.data ])
 
   const reset = () => {
     if (!is_store_ready(store.data)) return
 
+    // Clear logs when resetting
     store.update({ logs: [] })
 
+    // Get the group, share, peers, and relays from the store.
     const { group, share, peers, relays } = store.data
 
+    // Get the URLs from the relays.
     const urls = relays.map(r => r.url)
 
+    // Otherwise create a new node
     node_ref.current = new BifrostNode(group, share, urls, { policies : peers })
 
     node_ref.current.once('ready', () => {
-      console.log('node ready')
+      console.log('node_ref.current.ready')
       setStatus('online')
     })
 
-    node_ref.current.once('error', (error) => {
-      console.error('node error:', error)
+    node_ref.current.once('closed', () => {
       setStatus('offline')
     })
 
-    node_ref.current.once('closed', () => {
-      console.log('node closed')
+    node_ref.current.on('error', (error) => {
       setStatus('offline')
     })
 
     node_ref.current.on('*', (event, data) => {
+      // Skip message events.
       if (event === 'message')       return
-      // if (event.startsWith('/ping')) return
-
-      const log = {
+      if (event.startsWith('/ping')) return
+      // Log the event.
+      const log_entry = {
         timestamp : new Date().toISOString(),
         message   : String(event),
         type      : 'info' as LogType
       }
-      
-      store.update({ logs: update_log(store_ref.current, log) })
-
-      console.log('event received:', event)
-      console.dir(data, { depth : null })
+      console.log('event:', event)
+      console.dir(data, { depth: null })
+      // Update the logs. 
+      const logs = update_log(store_ref.current, log_entry)
+      // Update the store.
+      store.update({ logs })
     })
 
     node_ref.current.connect()
   }
 
   const stop = () => {
-    if (!node_ref.current) return
     node_ref.current = null
   }
 
+  // Reset node when core configuration changes
   useEffect(() => {
     reset()
-  }, [ store.data.group, store.data.share, store.data.relays, store.data.peers ])
+  }, [ store.data.group, store.data.share, store.data.relays ])
 
-  return { ref: node_ref, reset, stop, status }
+  return useMemo(() => ({
+    ref: node_ref,
+    reset,
+    stop,
+    status
+  }), [ reset, stop, status ])
 }
 
 function is_store_ready (store : AppStore) : store is StoreReady {
