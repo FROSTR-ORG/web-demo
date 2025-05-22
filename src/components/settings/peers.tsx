@@ -28,7 +28,7 @@ export function PeerConfig() {
   const update_peer = (idx: number, key: 'send' | 'recv', value: boolean) => {
     setPeers(prev => {
       const updated = [ ...prev ?? [] ]
-      updated[idx][key] = value
+      updated[idx].policy[key] = value
       return updated
     })
     setChanges(true)
@@ -74,16 +74,16 @@ export function PeerConfig() {
                     <input
                       type="checkbox"
                       className="peer-checkbox"
-                      checked={peer.send}
-                      onChange={() => update_peer(idx, 'send', !peer.send)}
+                      checked={peer.policy.send}
+                      onChange={() => update_peer(idx, 'send', !peer.policy.send)}
                     />
                   </td>
                   <td className="checkbox-cell">
                     <input
                       type="checkbox"
                       className="peer-checkbox"
-                      checked={peer.recv}
-                      onChange={() => update_peer(idx, 'recv', !peer.recv)}
+                      checked={peer.policy.recv}
+                      onChange={() => update_peer(idx, 'recv', !peer.policy.recv)}
                     />
                   </td>
                 </tr>
@@ -126,7 +126,6 @@ function init_peer_permissions (
     .filter((commit) => commit.idx !== self_idx)
     .map(commit => ({
       pubkey : commit.pubkey,
-      send   : false,
-      recv   : true
+      policy : { send : false, recv : true }
     }))
 }

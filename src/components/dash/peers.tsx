@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 
-import { useNode }  from '@/context/node.js'
-import { useStore } from '@/store/index.js'
+import { useNode }   from '@/context/node.js'
+import { useStore }  from '@/store/index.js'
+import { now }       from '@frostr/bifrost/util'
+import { PING_IVAL } from '@/const.js'
+import { PeerConfig } from '@frostr/bifrost'
 
 interface PeerStatus {
   pubkey : string
@@ -11,37 +14,37 @@ interface PeerStatus {
 export function PeerInfo() {
   const node  = useNode()
   const store = useStore()
-  const [ peerStatus, setPeerStatus ] = useState<PeerStatus[]>([])
+  const [ status, setStatus ] = useState<PeerStatus[]>([])
 
   // Function to check peer status
   const checkPeerStatus = async () => {
     if (!node.ref.current) return
+    
+    const stamp = now()
+    const peers = node.ref.current.peers
+    const stale = peers.filter(peer => peer.updated < stamp - PING_IVAL)
 
-    const pongs = await node.ref.current.req.ping()
+    console.log('peers', peers)
+    console.log('stale', stale)
 
-    console.log(pongs)
-
-    if (!pongs.ok) return
-
-    const peers    = node.ref.current.peers
-    const policies = peers.map(peer => ({
-      pubkey : peer.pubkey,
-      send   : peer.policy.send,
-      recv   : peer.policy.recv
-    }))
-
-    store.update({ peers : policies })
-
-    const stats : PeerStatus[] = []
-
-    for (const peer of peers) {
-      stats.push({
-        pubkey   : peer.pubkey,
-        status   : peer.status
-      })
+    const pings = []
+    
+    for (const peer of stale) {
+      pings.push(node.ref.current.req.ping(peer.pubkey).then(pong => {
+        const updated = [ ...status.filter(p => p.pubkey !== peer.pubkey) ]
+        updated.push({
+          pubkey : peer.pubkey,
+          status : pong.ok ? 'online' : 'offline'
+        })
+        setStatus(updated)
+      }))
     }
 
-    setPeerStatus(stats)
+    console.log('pings', pings)
+
+    await Promise.all(pings)
+
+    store.update({ peers : node.ref.current.peers })
   }
 
   // Check peer status periodically
@@ -55,12 +58,12 @@ export function PeerInfo() {
     const interval = setInterval(checkPeerStatus, 30000) // Check every 30 seconds
 
     return () => clearInterval(interval)
-  }, [ node.status ])
+  }, [])
 
   return (
     <div className="dashboard-container">
       <h2 className="section-header">Peer Status</h2>
-      {peerStatus.length === 0 ? (
+      {status.length === 0 ? (
         <p>waiting for peers...</p>
       ) : (
         <table>
@@ -71,7 +74,7 @@ export function PeerInfo() {
             </tr>
           </thead>
           <tbody>
-            {peerStatus.map((peer) => (
+            {status.map((peer) => (
               <tr key={peer.pubkey}>
                 <td className="pubkey-cell">{peer.pubkey}</td>
                 <td>

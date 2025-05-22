@@ -52,7 +52,7 @@ export function useBifrost () : NodeAPI {
 
     node_ref.current.on('*', (event, data) => {
       if (event === 'message')       return
-      if (event.startsWith('/ping')) return
+      // if (event.startsWith('/ping')) return
 
       const log = {
         timestamp : new Date().toISOString(),
