@@ -29,14 +29,9 @@ export function RelayConfig() {
   
   // Update relay enabled status locally
   const update_relay = (idx: number, key: 'read' | 'write') => {
-    setRelays(prev => {
-      const updated = [ ...prev ]
-      updated[idx] = {
-        ...updated[idx],
-        [key]: !updated[idx][key]
-      }
-      return updated
-    })
+    const policies = [ ...relays ]
+    policies[idx][key] = !policies[idx][key]
+    setRelays(policies)
     setChanges(true)
   }
   
@@ -51,7 +46,7 @@ export function RelayConfig() {
     } else if (relays.some(relay => relay.url === relayUrl)) {
       setError('Relay already exists')
     } else {
-      setRelays(prev => [...prev, { url: relayUrl, read: true, write: true }])
+      setRelays(prev => [ ...prev, { url: relayUrl, read: true, write: true } ])
       setUrl('')
       setChanges(true)
     }
@@ -59,25 +54,32 @@ export function RelayConfig() {
   
   // Remove a relay from local state
   const remove_relay = (idx: number) => {
-    setRelays(prev => prev.filter((_, i) => i !== idx))
+    const filtered = relays.filter((_, i) => i !== idx)
+    setRelays(filtered)
     setChanges(true)
   }
 
   useEffect(() => {
-    const params  = new URLSearchParams(window.location.search)
-    const r_param = params.getAll('r')
-    if (r_param.length > 0) {
-      const new_relays : RelayPolicy[] = []
-      for (const r_url of r_param) {
-        if (!relays.some(relay => relay.url === r_url)) {
-          new_relays.push({ url: r_url, read: true, write: true })
-        }
-      }
-      if (new_relays.length > 0) {
-        store.update({ relays : [ ...relays, ...new_relays ] })
+    // Parse the URL parameters for relay URLs.
+    const params = new URLSearchParams(window.location.search)
+    // Get all the relay URLs from the URL parameters.
+    const urls   = params.getAll('r')
+    // If there are no relay URLs, return.
+    if (urls.length === 0) return
+    // Create an array of relay policies to add.
+    const updates : RelayPolicy[] = []
+    // For each relay URL,
+    for (const url of urls) {
+      // If the relay URL is not already in the list, add it.
+      if (!relays.some(relay => relay.url === url)) {
+        updates.push({ url, read: true, write: true })
       }
     }
-  }, [ store.data.relays ])
+    // If there are no updates, return.
+    if (updates.length === 0) return
+    // Add the relay policies to the store.
+    store.update({ relays : [ ...relays, ...updates ] })
+  }, [])
 
   useEffect(() => {
     if (error !== null) setError(null)

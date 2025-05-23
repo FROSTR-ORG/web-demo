@@ -42,8 +42,10 @@ export function PeerConfig() {
     const { share, group, peers } = store.data
     if (share && group && peers.length === 0) {
       setPeers(init_peer_permissions(group, share.idx))
+      update()
     } else if (!share || !group) {
       setPeers([])
+      update()
     }
   }, [ store.data.share, store.data.group ])
 
