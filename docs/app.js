@@ -42403,13 +42403,9 @@ function RelayConfig() {
     setChanges(false);
   };
   const update_relay = (idx, key) => {
-    setRelays((prev) => {
-      const updated = [...prev];
-      updated[idx] = __spreadProps(__spreadValues({}, updated[idx]), {
-        [key]: !updated[idx][key]
-      });
-      return updated;
-    });
+    const policies = [...relays];
+    policies[idx][key] = !policies[idx][key];
+    setRelays(policies);
     setChanges(true);
   };
   const add_relay = () => {
@@ -42427,23 +42423,22 @@ function RelayConfig() {
     }
   };
   const remove_relay = (idx) => {
-    setRelays((prev) => prev.filter((_, i2) => i2 !== idx));
+    const filtered = relays.filter((_, i2) => i2 !== idx);
+    setRelays(filtered);
     setChanges(true);
   };
   (0, import_react8.useEffect)(() => {
     const params2 = new URLSearchParams(window.location.search);
     const urls = params2.getAll("r");
-    if (urls.length > 0) {
-      const new_relays = [];
-      for (const url2 of urls) {
-        if (!relays.some((relay) => relay.url === url2)) {
-          new_relays.push({ url: url2, read: true, write: true });
-        }
-      }
-      if (new_relays.length > 0) {
-        store.update({ relays: [...relays, ...new_relays] });
+    if (urls.length === 0) return;
+    const updates = [];
+    for (const url2 of urls) {
+      if (!relays.some((relay) => relay.url === url2)) {
+        updates.push({ url: url2, read: true, write: true });
       }
     }
+    if (updates.length === 0) return;
+    store.update({ relays: [...relays, ...updates] });
   }, []);
   (0, import_react8.useEffect)(() => {
     if (error !== null) setError(null);
