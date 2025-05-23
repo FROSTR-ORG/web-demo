@@ -37,7 +37,7 @@ export function useBifrost () : NodeAPI {
     // Get the URLs from the relays.
     const urls = relays.map(r => r.url)
 
-    // Otherwise create a new node
+    // Create a new node.
     node_ref.current = new BifrostNode(group, share, urls, { policies : peers })
 
     node_ref.current.once('ready', () => {

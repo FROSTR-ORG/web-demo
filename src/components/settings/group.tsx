@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useStore }            from '@/store/index.js'
 import { QRScanner }           from '@/components/util/scanner.js'
 
@@ -16,12 +16,13 @@ export function GroupConfig() {
   const [ error, setError ] = useState<string | null>(null)
   const [ show, setShow   ] = useState<boolean>(false)
   const [ saved, setSaved ] = useState<boolean>(false)
+
   const [ isScanning, setIsScanning ] = useState<boolean>(false)
 
   /**
    * Handle the update of the store.
    */
-  const update_group = () => {
+  const update_group = (input : string) => {
     // If an error exists, do not update the group.
     if (error !== null) return
     // If the input is empty,
@@ -52,17 +53,17 @@ export function GroupConfig() {
     const params  = new URLSearchParams(window.location.search)
     const group   = store.data.group
     const g_param = params.get('g')
-    if (!group && g_param) {
-      const pkg = get_group_pkg(g_param)
-      if (pkg === null) return
-      setInput(g_param)
-      store.update({ group : pkg })
-    }
-  }, [ store.data.group ])
+    if (group !== null || g_param === null) return
+    const pkg = get_group_pkg(g_param)
+    if (pkg === null) return
+    setInput(g_param)
+    store.update({ group : pkg })
+  }, [])
 
   useEffect(() => {
     try {
       if (store.data.group !== null) {
+        console.log('we are here')
         setInput(get_group_str(store.data.group))
       } else {
         setInput('')
@@ -125,7 +126,7 @@ export function GroupConfig() {
             </button>
             <button
               className={`button action-button ${saved ? 'saved-button' : ''}`} 
-              onClick={update_group}
+              onClick={() => update_group(input)}
               disabled={!is_group_changed(input, store.data.group) || error !== null}
             >
               {saved ? 'Saved' : 'Save'}

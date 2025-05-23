@@ -41,11 +41,12 @@ export function PeerConfig() {
   useEffect(() => {
     const { share, group, peers } = store.data
     if (share && group && peers.length === 0) {
-      setPeers(init_peer_permissions(group, share.idx))
-      update()
+      const new_peers = init_peer_permissions(group, share.idx)
+      setPeers(new_peers)
+      store.update({ peers : new_peers })
     } else if (!share || !group) {
       setPeers([])
-      update()
+      store.update({ peers : [] })
     }
   }, [ store.data.share, store.data.group ])
 
@@ -127,7 +128,7 @@ function init_peer_permissions (
   return group.commits
     .filter((commit) => commit.idx !== self_idx)
     .map(commit => ({
-      pubkey : commit.pubkey,
+      pubkey : commit.pubkey.slice(2),
       policy : { send : false, recv : true }
     }))
 }
