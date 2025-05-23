@@ -167,9 +167,31 @@ async function build(): Promise<void> {
       plugins: [cssPlugin]
     })
     
+    // Watch CSS files
+    const watchCssFiles = async () => {
+      const srcStylesDir = path.join('src', 'styles')
+      const distStylesDir = path.join(DIST_DIR, 'styles')
+      
+      // Ensure dist styles directory exists
+      await fs.promises.mkdir(distStylesDir, { recursive: true })
+      
+      // Initial copy
+      await copyCssFiles()
+      
+      // Watch for changes
+      fs.watch(srcStylesDir, async (eventType, filename) => {
+        if (filename && filename.endsWith('.css')) {
+          console.log(`[ build ] CSS file changed: ${filename}`)
+          const srcPath = path.join(srcStylesDir, filename)
+          const distPath = path.join(distStylesDir, filename)
+          await fs.promises.copyFile(srcPath, distPath)
+        }
+      })
+    }
+    
     await Promise.all([
       appContext.watch(),
-      copyCssFiles()
+      watchCssFiles()
     ])
     
     console.log('[ build ] watching for changes...')

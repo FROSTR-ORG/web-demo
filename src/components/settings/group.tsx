@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStore }            from '@/store/index.js'
 import { QRScanner }           from '@/components/util/scanner.js'
 
@@ -46,24 +46,9 @@ export function GroupConfig() {
     setTimeout(() => setSaved(false), 1500)
   }
 
-  /**
-   * Handle the loading of the group from the URL.
-   */
-  useEffect(() => {
-    const params  = new URLSearchParams(window.location.search)
-    const group   = store.data.group
-    const g_param = params.get('g')
-    if (group !== null || g_param === null) return
-    const pkg = get_group_pkg(g_param)
-    if (pkg === null) return
-    setInput(g_param)
-    store.update({ group : pkg })
-  }, [])
-
   useEffect(() => {
     try {
       if (store.data.group !== null) {
-        console.log('we are here')
         setInput(get_group_str(store.data.group))
       } else {
         setInput('')

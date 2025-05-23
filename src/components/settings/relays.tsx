@@ -60,28 +60,6 @@ export function RelayConfig() {
   }
 
   useEffect(() => {
-    // Parse the URL parameters for relay URLs.
-    const params = new URLSearchParams(window.location.search)
-    // Get all the relay URLs from the URL parameters.
-    const urls   = params.getAll('r')
-    // If there are no relay URLs, return.
-    if (urls.length === 0) return
-    // Create an array of relay policies to add.
-    const updates : RelayPolicy[] = []
-    // For each relay URL,
-    for (const url of urls) {
-      // If the relay URL is not already in the list, add it.
-      if (!relays.some(relay => relay.url === url)) {
-        updates.push({ url, read: true, write: true })
-      }
-    }
-    // If there are no updates, return.
-    if (updates.length === 0) return
-    // Add the relay policies to the store.
-    store.update({ relays : [ ...relays, ...updates ] })
-  }, [])
-
-  useEffect(() => {
     if (error !== null) setError(null)
   }, [ relayUrl ])
 

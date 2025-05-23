@@ -40,12 +40,12 @@ export function useBifrost () : NodeAPI {
     // Create a new node.
     node_ref.current = new BifrostNode(group, share, urls, { policies : peers })
 
-    node_ref.current.once('ready', () => {
-      console.log('node_ref.current.ready')
+    node_ref.current.on('ready', () => {
+      console.log('bifrost node initialized')
       setStatus('online')
     })
 
-    node_ref.current.once('closed', () => {
+    node_ref.current.on('closed', () => {
       setStatus('offline')
     })
 

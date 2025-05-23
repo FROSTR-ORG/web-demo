@@ -145,6 +145,11 @@
   color: white;
 }
 
+.status-indicator.checking {
+  background-color: #B8860B;  /* DarkGoldenrod - a more muted, darker yellow */
+  color: white;
+}
+
 .status-indicator.unknown {
   background-color: #9e9e9e;
   color: white;
