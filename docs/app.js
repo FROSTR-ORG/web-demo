@@ -41595,9 +41595,7 @@ function usePeerStatus() {
   const [status, setStatus] = (0, import_react4.useState)([]);
   const fetch_status = async () => {
     var _a;
-    console.log("fetching status");
     if (!((_a = node.ref.current) == null ? void 0 : _a.is_ready)) return;
-    console.log("checking status");
     const stamp3 = now2();
     const peers = node.ref.current.peers;
     const stale = peers.filter((peer) => peer.status === "offline" || peer.updated < stamp3 - PING_IVAL);
@@ -41625,14 +41623,12 @@ function usePeerStatus() {
         status: "checking",
         updated: peer.updated
       }));
-      console.log("initializing status");
       setStatus(init_status);
     }
   }, [node.ref]);
   (0, import_react4.useEffect)(() => {
     if (node.ref.current && !is_init) {
       (async () => {
-        console.log("hydrating status");
         await sleep(500);
         await fetch_status();
         setInit(true);

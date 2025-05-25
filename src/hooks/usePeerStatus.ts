@@ -15,10 +15,8 @@ export function usePeerStatus () {
   const [ status, setStatus ] = useState<PeerStatus[]>([])
 
   const fetch_status = async () => {
-    console.log('fetching status')
     // If the node is not ready, or not online, do nothing.
     if (!node.ref.current?.is_ready) return
-    console.log('checking status')
     // Get the current timestamp.
     const stamp = now()
     // Get the peers from the node.
@@ -59,7 +57,6 @@ export function usePeerStatus () {
         updated : peer.updated
       }))
       // Set the status array to the initial status.
-      console.log('initializing status')
       setStatus(init_status)
     }
   }, [ node.ref ])
@@ -67,7 +64,6 @@ export function usePeerStatus () {
   useEffect(() => {
     if (node.ref.current && !is_init) {
       (async () => {
-        console.log('hydrating status')
         await sleep(500)
         await fetch_status()
         setInit(true)
