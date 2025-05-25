@@ -180,4 +180,16 @@
   .console-timestamp {
     font-size: 0.8em;
   }
+}
+
+/* Add comfortable spacing between dashboard sections in the dashboard tab */
+.tab-panel > .dashboard-container,
+.tab-panel > .console-container {
+  margin-bottom: 2rem;
+}
+
+/* Remove margin from the last dashboard section */
+.tab-panel > .dashboard-container:last-child,
+.tab-panel > .console-container:last-child {
+  margin-bottom: 0;
 } 
