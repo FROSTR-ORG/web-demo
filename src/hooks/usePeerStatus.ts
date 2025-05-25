@@ -14,6 +14,19 @@ export function usePeerStatus () {
   const [ is_init, setInit  ] = useState(false)
   const [ status, setStatus ] = useState<PeerStatus[]>([])
 
+  const _update_peer = (pubkey: string, status: 'online' | 'offline') => {
+    setStatus(prevStatus => {
+      const new_status: PeerStatus = { pubkey, status, updated: now() }
+      return [...prevStatus.filter(p => p.pubkey !== pubkey), new_status]
+    })
+  }
+
+  const ping_peer = async (pubkey: string) => {
+    if (!node.ref.current?.is_ready) return
+    const pong = await node.ref.current.req.ping(pubkey)
+    _update_peer(pubkey, pong.ok ? 'online' : 'offline')
+  }
+
   const fetch_status = async () => {
     // If the node is not ready, or not online, do nothing.
     if (!node.ref.current?.is_ready) return
@@ -32,14 +45,7 @@ export function usePeerStatus () {
       // Create a promise to ping the peer.
       const promise = node.ref.current.req.ping(peer.pubkey).then(pong => {
         // Update the status using the functional update pattern
-        setStatus(prevStatus => {
-          const new_status: PeerStatus = {
-            pubkey: peer.pubkey,
-            status: pong.ok ? 'online' : 'offline',
-            updated: now()
-          }
-          return [...prevStatus.filter(p => p.pubkey !== peer.pubkey), new_status]
-        })
+        _update_peer(peer.pubkey, pong.ok ? 'online' : 'offline')
       })
       // Add the promise to the array.
       promises.push(promise)
@@ -76,5 +82,5 @@ export function usePeerStatus () {
     return () => clearInterval(interval)
   }, [ node.status, node.ref ])
 
-  return { status, fetch_status }
+  return { status, ping_peer }
 }

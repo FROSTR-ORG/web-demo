@@ -398,3 +398,62 @@ td.checkbox-cell {
     width: 50%;
   }
 }
+
+th, td {
+  padding: 6px 8px;
+}
+
+.refresh-cell {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  text-align: center;
+}
+
+/* Peers Table Specific Styles */
+.peers-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.peers-table th,
+.peers-table td {
+  padding: 2px 4px;
+}
+
+/* First column - Peer address */
+.peers-table th:nth-child(1),
+.peers-table td:nth-child(1) {
+  width: 220px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Second column - Status */
+.peers-table th:nth-child(2),
+.peers-table td:nth-child(2) {
+  width: 30px;
+  max-width: 60px;
+  text-align: center;
+}
+
+/* Third column - Refresh button */
+.peers-table th:nth-child(3),
+.peers-table td:nth-child(3),
+.peers-table .refresh-cell {
+  width: 30px;
+  max-width: 44px;
+  padding: 2px;
+  text-align: center;
+}
+
+.status-indicator {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+  text-transform: capitalize;
+  margin: 0;
+}
