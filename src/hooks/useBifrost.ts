@@ -55,19 +55,42 @@ export function useBifrost () : NodeAPI {
 
     node_ref.current.on('*', (event, data) => {
       // Skip message events.
-      if (event === 'message')       return
+      if (event === 'message') return
       if (event.startsWith('/ping')) return
-      // Log the event.
-      const log_entry = {
-        timestamp : new Date().toISOString(),
-        message   : String(event),
-        type      : 'info' as LogType
+
+      let type: LogType = 'info' // Default log type
+      let message = String(event)
+      let payload: any = data
+
+      // Determine log type and refine message based on event string
+      if (message.toLowerCase() === 'ready') {
+        type = 'ready'
+        payload = undefined // No payload for ready events
+      } else if (message.startsWith('/sign')) {
+        type = 'sign' // General sign type, can be refined
+        if (message.endsWith('/req')) {
+          type = 'req'
+        } else if (message.endsWith('/res')) {
+          type = 'res'
+        }
+      } else if (message.startsWith('/error')) {
+        type = 'error'
+      } // Add more specific event type handling as needed
+
+      // If payload is an empty object, set it to undefined so no dropdown is shown
+      if (typeof payload === 'object' && payload !== null && Object.keys(payload).length === 0) {
+        payload = undefined
       }
-      console.log('event:', event)
-      console.dir(data, { depth: null })
-      // Update the logs. 
+
+      const log_entry: LogEntry = {
+        timestamp: Date.now(),
+        message: message,
+        type: type,
+        payload: payload
+      }
+
+      // console.log('event:', event, 'data:', data, 'log_entry:', log_entry)
       const logs = update_log(store_ref.current, log_entry)
-      // Update the store.
       store.update({ logs })
     })
 
