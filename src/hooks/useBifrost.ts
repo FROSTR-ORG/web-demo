@@ -41,6 +41,7 @@ export function useBifrost () : NodeAPI {
     node_ref.current = new BifrostNode(group, share, urls, { policies : peers })
 
     node_ref.current.on('ready', () => {
+      node_ref.current?.req.echo('echo')
       console.log('bifrost node initialized')
       setStatus('online')
     })
