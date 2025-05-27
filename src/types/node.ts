@@ -6,7 +6,7 @@ import type {
 
 import type { MutableRefObject } from 'react'
 
-export type LogType    = 'info' | 'error' | 'warning' | 'success'
+export type LogType    = 'info' | 'error' | 'warning' | 'success' | 'sign' | 'req' | 'res' | 'ready'
 export type NodeStatus = 'stopped' | 'online' | 'offline'
 
 export interface NodeAPI {
@@ -22,9 +22,10 @@ export interface NodeCredentials {
 }
 
 export interface LogEntry {
-  timestamp : string
+  timestamp : number
   message   : string
-  type      : LogType
+  type      : string
+  payload?  : any
 }
 
 export interface PeerStatus {
