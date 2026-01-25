@@ -1,9 +1,9 @@
-import { useNode }       from '@/context/node.js'
+import { useBifrost }       from '@/context/bifrost.js'
 import { usePeerStatus } from '@/hooks/usePeerStatus.js'
 import { RefreshIcon }   from '@/components/util/icons.js'
 
 export function PeerInfo() {
-  const node = useNode()
+  const node = useBifrost()
   const { status, ping_peer } = usePeerStatus()
 
   return (

@@ -1,8 +1,8 @@
-import { useNode } from '@/context/node.js'
+import { useBifrost } from '@/context/bifrost.js'
 import { NodeAPI } from '@/types'
 
 export function NodeInfo () {
-  const node = useNode()
+  const node = useBifrost()
 
   return (
     <div className="dashboard-container">

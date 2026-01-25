@@ -1,6 +1,6 @@
 import { StrictMode }    from 'react'
 import { createRoot }    from 'react-dom/client'
-import { NodeProvider }  from '@/context/node.js'
+import { BifrostProvider }  from '@/context/bifrost.js'
 import { StoreProvider } from '@/store/index.js'
 import { App }           from '@/components/layout/app.js'
 
@@ -22,9 +22,9 @@ const root = createRoot(container)
 root.render(
   <StrictMode>
     <StoreProvider>
-      <NodeProvider>
+      <BifrostProvider>
         <App />
-      </NodeProvider>
+      </BifrostProvider>
     </StoreProvider>
   </StrictMode>
 )

@@ -14,7 +14,7 @@ interface ProviderProps {
 
 const Context = createContext<NodeAPI | null>(null)
 
-export function NodeProvider ({ children }: ProviderProps): JSX.Element {
+export function BifrostProvider ({ children }: ProviderProps): JSX.Element {
 
   const node = useBifrost()
 
@@ -25,7 +25,7 @@ export function NodeProvider ({ children }: ProviderProps): JSX.Element {
   )
 }
 
-export function useNode () {
+export function useBifrost () {
   const ctx = useContext(Context)
   if (ctx === null) {
     throw new Error('useNode must be used within a NodeProvider')

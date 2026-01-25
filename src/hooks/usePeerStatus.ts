@@ -3,13 +3,13 @@ import { sleep } from "@frostr/bifrost/util"
 import { useEffect, useState } from 'react'
 
 import { now }       from '@frostr/bifrost/util'
-import { useNode }   from '@/context/node.js'
+import { useBifrost }   from '@/context/bifrost.js'
 import { PING_IVAL } from '@/const.js'
 
 import type { PeerStatus } from '@/types/index.js'
 
 export function usePeerStatus () {
-  const node = useNode()
+  const node = useBifrost()
 
   const [ is_init, setInit  ] = useState(false)
   const [ status, setStatus ] = useState<PeerStatus[]>([])

@@ -1,7 +1,7 @@
 import { concurrently } from 'concurrently'
 
 const SERVE_HOST = 'http://localhost'
-const SERVE_PORT = 3000
+const SERVE_PORT = 3001
 
 concurrently([
   `tsx scripts/build.ts --watch`,
